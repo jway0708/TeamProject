@@ -23,17 +23,16 @@
   }
 }
 
-/* 输入框统一样式 */
 ion-item {
   --background: #ffffff;
   --border-radius: 12px;
   --highlight-height: 0;
   --padding-start: 16px;
   --inner-padding-end: 8px;
+  margin-bottom: 16px;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-  transition: border-color 0.2s ease;
 
   &.item-has-focus {
     border-color: #0e3d2f;
@@ -58,7 +57,6 @@ ion-item {
   }
 }
 
-/* 注册按键样式 */
 ion-button[type="submit"] {
   --background: #0e3d2f;
   --background-activated: #0a2d23;
@@ -66,11 +64,9 @@ ion-button[type="submit"] {
   height: 48px;
   font-size: 16px;
   font-weight: 600;
-  letter-spacing: 0.5px;
   box-shadow: 0 4px 12px rgba(14, 61, 47, 0.2);
 }
 
-/* 返回登录链接按键 */
 .ion-text-center {
   ion-button {
     --color: #718096;

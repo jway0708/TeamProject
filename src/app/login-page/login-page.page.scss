@@ -6,7 +6,7 @@
 
 .auth-container {
   max-width: 400px;
-  margin: 20px auto 0 auto;
+  margin: 16px auto 0 auto;
   padding: 0 8px;
 
   h2 {
@@ -23,36 +23,17 @@
   }
 }
 
-/* 登录/注册模式切换 Segment */
-ion-segment {
-  --background: #edf2f7;
-  border-radius: 12px;
-  padding: 3px;
-  margin-bottom: 24px;
-
-  ion-segment-button {
-    --color: #718096;
-    --color-checked: #0e3d2f;
-    --background-checked: #ffffff;
-    --indicator-color: transparent;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 14px;
-    min-height: 40px;
-  }
-}
-
-/* 输入框统一样式 */
+/* Ionic 原生输入框样式重置 */
 ion-item {
   --background: #ffffff;
   --border-radius: 12px;
   --highlight-height: 0;
   --padding-start: 16px;
   --inner-padding-end: 8px;
+  margin-bottom: 16px;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-  transition: border-color 0.2s ease;
 
   &.item-has-focus {
     border-color: #0e3d2f;
@@ -77,7 +58,7 @@ ion-item {
   }
 }
 
-/* 提交按键样式 */
+/* Ionic 主按钮 */
 ion-button[type="submit"] {
   --background: #0e3d2f;
   --background-activated: #0a2d23;
@@ -85,6 +66,5 @@ ion-button[type="submit"] {
   height: 48px;
   font-size: 16px;
   font-weight: 600;
-  letter-spacing: 0.5px;
   box-shadow: 0 4px 12px rgba(14, 61, 47, 0.2);
 }
