@@ -4,9 +4,10 @@ import { ToastController, LoadingController } from '@ionic/angular';
 import { ApiService } from '../services/api';
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.page.html',
-  styleUrls: ['./login.page.scss'],
+  selector: 'app-login-page',
+  templateUrl: './login-page.page.html',
+  styleUrls: ['./login-page.page.scss'],
+  standalone: false,
 })
 export class LoginPage {
   phoneNumber: string = '';

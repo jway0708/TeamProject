@@ -6,7 +6,7 @@ import { IonicModule } from '@ionic/angular/lazy';
 
 import { LoginPagePageRoutingModule } from './login-page-routing.module';
 
-import { LoginPagePage } from './login-page.page';
+import { LoginPage } from './login-page.page';
 
 @NgModule({
   imports: [
@@ -15,6 +15,6 @@ import { LoginPagePage } from './login-page.page';
     IonicModule,
     LoginPagePageRoutingModule
   ],
-  declarations: [LoginPagePage]
+  declarations: [LoginPage]
 })
 export class LoginPagePageModule {}

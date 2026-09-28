@@ -7,6 +7,7 @@ import { ApiService } from '../services/api';
   selector: 'app-register-page',
   templateUrl: './register-page.page.html',
   styleUrls: ['./register-page.page.scss'],
+  standalone: false,
 })
 export class RegisterPagePage {
   phoneNumber: string = '';
