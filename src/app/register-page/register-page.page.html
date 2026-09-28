@@ -1,0 +1,50 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/login-page"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Register</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="auth-container">
+    <h2>Create Account</h2>
+    <p class="subtitle">Please enter your details to sign up</p>
+
+    <form (ngSubmit)="onSubmit()" class="ion-margin-top">
+      <!-- Phone Input -->
+      <ion-item fill="outline" class="ion-margin-bottom">
+        <ion-label position="floating">Phone Number</ion-label>
+        <ion-input type="tel" [(ngModel)]="phoneNumber" name="phoneNumber" placeholder="e.g. 0123456789" required></ion-input>
+      </ion-item>
+
+      <!-- Referral Code Input (Optional) -->
+      <ion-item fill="outline" class="ion-margin-bottom">
+        <ion-label position="floating">Referral Code (Optional)</ion-label>
+        <ion-input type="text" [(ngModel)]="referralCode" name="referralCode" (ionBlur)="onCheckReferral()"></ion-input>
+      </ion-item>
+
+      <!-- OTP Input + Send Button -->
+      <ion-item fill="outline" class="ion-margin-bottom">
+        <ion-label position="floating">OTP Code</ion-label>
+        <ion-input type="number" [(ngModel)]="otpCode" name="otpCode" required></ion-input>
+        <ion-button slot="end" fill="clear" (click)="onSendOtp()" [disabled]="countdown > 0">
+          {{ countdown > 0 ? countdown + 's' : 'Get OTP' }}
+        </ion-button>
+      </ion-item>
+
+      <!-- Submit Button -->
+      <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="!phoneNumber || !otpCode">
+        Register Now
+      </ion-button>
+
+      <!-- Back to Login Link -->
+      <div class="ion-text-center ion-margin-top">
+        <ion-button fill="clear" size="small" (click)="goToLogin()">
+          Already have an account? Sign In
+        </ion-button>
+      </div>
+    </form>
+  </div>
+</ion-content>

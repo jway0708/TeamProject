@@ -4,15 +4,14 @@ import { ToastController, LoadingController } from '@ionic/angular';
 import { ApiService } from '../services/api';
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.page.html',
-  styleUrls: ['./login.page.scss'],
+  selector: 'app-register-page',
+  templateUrl: './register-page.page.html',
+  styleUrls: ['./register-page.page.scss'],
 })
-export class LoginPage {
+export class RegisterPagePage {
   phoneNumber: string = '';
   otpCode: string = '';
   referralCode: string = '';
-  isRegister: boolean = false;
   countdown: number = 0;
   private timer: any;
 
@@ -22,11 +21,6 @@ export class LoginPage {
     private toastCtrl: ToastController,
     private loadingCtrl: LoadingController
   ) {}
-
-  resetForm() {
-    this.otpCode = '';
-    this.referralCode = '';
-  }
 
   // 1. 失去焦点时校验推荐码
   onCheckReferral() {
@@ -41,7 +35,7 @@ export class LoginPage {
     });
   }
 
-  // 2. 发送 OTP 验证码
+  // 2. 发送注册 OTP 验证码
   async onSendOtp() {
     if (!this.phoneNumber) {
       this.showToast('Please enter your phone number first.');
@@ -51,7 +45,8 @@ export class LoginPage {
     const loading = await this.loadingCtrl.create({ message: 'Sending OTP...' });
     await loading.present();
 
-    this.apiService.requestOtp(this.phoneNumber, this.isRegister).subscribe({
+    // isRegister 参数传 true
+    this.apiService.requestOtp(this.phoneNumber, true).subscribe({
       next: async (res) => {
         await loading.dismiss();
         this.showToast('OTP sent successfully!');
@@ -74,31 +69,35 @@ export class LoginPage {
     }, 1000);
   }
 
-  // 3. 提交登录或注册
+  // 3. 提交注册
   async onSubmit() {
-    const loading = await this.loadingCtrl.create({ message: 'Processing...' });
+    const loading = await this.loadingCtrl.create({ message: 'Registering...' });
     await loading.present();
 
+    // isRegister 参数传 true
     this.apiService.loginOrRegister(
       this.phoneNumber,
       this.otpCode,
       this.referralCode,
-      this.isRegister
+      true
     ).subscribe({
       next: async (res) => {
         await loading.dismiss();
-        // 保存当前用户手机号到本地存储
         localStorage.setItem('user_phone', this.phoneNumber);
         
-        this.showToast('Operation successful!');
-        // 跳转至首页
+        this.showToast('Registration successful!');
         this.router.navigateByUrl('/home');
       },
       error: async (err) => {
         await loading.dismiss();
-        this.showToast('Verification failed: ' + (err.error?.message || 'Invalid OTP.'));
+        this.showToast('Registration failed: ' + (err.error?.message || 'Invalid OTP.'));
       }
     });
+  }
+
+  // 跳转回登录页
+  goToLogin() {
+    this.router.navigateByUrl('/login-page');
   }
 
   private async showToast(msg: string) {
