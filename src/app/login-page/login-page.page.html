@@ -1,0 +1,50 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-title>{{ isRegister ? '会员注册' : '会员登录' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="auth-container">
+    <h2>欢迎来到 Loyalty Member</h2>
+    <p class="subtitle">请输入手机号码以继续</p>
+
+    <!-- 切换模式 Segment -->
+    <ion-segment [(ngModel)]="isRegister" (ionChange)="resetForm()">
+      <ion-segment-button [value]="false">
+        <ion-label>登录</ion-label>
+      </ion-segment-button>
+      <ion-segment-button [value]="true">
+        <ion-label>注册</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
+    <form (ngSubmit)="onSubmit()" class="ion-margin-top">
+      <!-- 手机号码输入框 -->
+      <ion-item fill="outline" class="ion-margin-bottom">
+        <ion-label position="floating">手机号码</ion-label>
+        <ion-input type="tel" [(ngModel)]="phoneNumber" name="phoneNumber" placeholder="例: 0123456789" required></ion-input>
+      </ion-item>
+
+      <!-- 推荐码输入框 (仅注册模式显示) -->
+      <ion-item fill="outline" class="ion-margin-bottom" *ngIf="isRegister">
+        <ion-label position="floating">推荐码 (选填)</ion-label>
+        <ion-input type="text" [(ngModel)]="referralCode" name="referralCode" (ionBlur)="onCheckReferral()"></ion-input>
+      </ion-item>
+
+      <!-- OTP 验证码输入框 + 获取按键 -->
+      <ion-item fill="outline" class="ion-margin-bottom">
+        <ion-label position="floating">验证码 (OTP)</ion-label>
+        <ion-input type="number" [(ngModel)]="otpCode" name="otpCode" required></ion-input>
+        <ion-button slot="end" fill="clear" (click)="onSendOtp()" [disabled]="countdown > 0">
+          {{ countdown > 0 ? countdown + 's 后重试' : '获取验证码' }}
+        </ion-button>
+      </ion-item>
+
+      <!-- 提交按键 -->
+      <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="!phoneNumber || !otpCode">
+        {{ isRegister ? '立即注册' : '登录' }}
+      </ion-button>
+    </form>
+  </div>
+</ion-content>
