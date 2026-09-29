@@ -1,0 +1,59 @@
+/* Global Custom Tab Bar Styling */
+ion-tab-bar.custom-tab-bar {
+  --background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  height: 80px !important; /* Slightly increased height */
+  display: flex !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 9999 !important;
+  border-top: none !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08) !important;
+  padding-bottom: 15px !important;
+  overflow: visible !important; /* Crucial: allows the button to pop out of the bar */
+
+  ion-tab-button {
+    --color: #888888;
+    --color-selected: #1B4D3E;
+    flex: 1;
+    overflow: visible !important;
+
+    ion-icon {
+      font-size: 20px;
+      margin-bottom: 3px;
+    }
+
+    span {
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    &.center-qr-tab {
+      position: relative;
+      overflow: visible !important;
+      
+      .qr-fab-container {
+        width: 52px;
+        height: 52px;
+        background-color: #1B4D3E;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: -14px; /* Positioned perfectly balanced inside the bar */
+        left: 50%;
+        transform: translateX(-50%);
+        box-shadow: 0 6px 16px rgba(27, 77, 62, 0.4);
+
+        ion-icon {
+          color: #FFFFFF;
+          font-size: 22px;
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+}

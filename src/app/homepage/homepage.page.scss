@@ -1,0 +1,382 @@
+/* Variables */
+$bg-color: #F7F5F0;
+$primary-green: #1B4D3E;
+$accent-gold: #E5D3B3;
+$text-dark: #1A1A1A;
+$text-muted: #666666;
+$white: #FFFFFF;
+
+.homepage-content {
+  --background: #{$bg-color};
+  padding: 16px 24px;
+}
+
+/* Header */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0 20px 0;
+
+  .brand-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    letter-spacing: 1px;
+    color: $text-dark;
+    margin: 0;
+  }
+
+  .notification-btn {
+    background: $white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+
+    ion-icon {
+      font-size: 18px;
+      color: $text-dark;
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: 10px;
+      right: 11px;
+      width: 7px;
+      height: 7px;
+      background-color: #D9534F;
+      border-radius: 50%;
+    }
+  }
+}
+
+/* Greeting Section */
+.greeting-section {
+  margin-bottom: 20px;
+
+  .greeting-subtitle {
+    font-size: 15px;
+    color: $text-muted;
+    margin: 0 0 4px 0;
+  }
+
+  .user-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    color: $text-dark;
+    font-weight: 700;
+    margin: 0;
+  }
+}
+
+/* Member Card */
+.member-card {
+  background-color: $primary-green;
+  border-radius: 24px;
+  padding: 24px;
+  color: $white;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(27, 77, 62, 0.25);
+  margin-bottom: 24px;
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    .membership-badge {
+      background-color: $accent-gold;
+      color: $text-dark;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    .wallet-balance {
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0.9;
+    }
+  }
+
+  .card-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 20px;
+
+    .points-label {
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    .points-value {
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.5px;
+      margin: 0;
+    }
+
+    .qr-btn {
+      background-color: $white;
+      color: $text-dark;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 50px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+      ion-icon {
+        font-size: 16px;
+      }
+    }
+  }
+
+  .card-footer {
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 8px;
+
+      .progress-bar {
+        height: 100%;
+        background-color: $accent-gold;
+        border-radius: 3px;
+      }
+    }
+
+    .progress-text {
+      font-size: 12px;
+      opacity: 0.85;
+    }
+  }
+
+  .card-circle-1 {
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 180px;
+    height: 180px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .card-circle-2 {
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 120px;
+    height: 120px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+}
+
+/* Quick Navigation */
+.quick-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24px;
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    gap: 8px;
+
+    .nav-icon {
+      width: 56px;
+      height: 56px;
+      background-color: $white;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+
+      ion-icon {
+        font-size: 22px;
+        color: $primary-green;
+      }
+    }
+
+    span {
+      font-size: 12px;
+      font-weight: 500;
+      color: $text-dark;
+    }
+  }
+}
+
+/* Highlight Banner */
+.highlight-banner {
+  background-color: $white;
+  border-radius: 20px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+
+  .highlight-image-placeholder {
+    width: 72px;
+    height: 72px;
+    background: repeating-linear-gradient(45deg, #EFECE6, #EFECE6 10px, #E5E1D8 10px, #E5E1D8 20px);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    span {
+      font-size: 11px;
+      color: $text-muted;
+    }
+  }
+
+  .highlight-content {
+    .highlight-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: $text-dark;
+      margin: 0 0 2px 0;
+    }
+
+    .highlight-subtitle {
+      font-size: 12px;
+      color: $text-muted;
+      margin: 0 0 6px 0;
+    }
+
+    .highlight-action {
+      font-size: 12px;
+      font-weight: 600;
+      color: $primary-green;
+      text-decoration: none;
+    }
+  }
+}
+
+/* Rewards Section */
+.rewards-section {
+  margin-bottom: 30px;
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      color: $text-dark;
+      margin: 0;
+    }
+
+    .see-all-link {
+      font-size: 13px;
+      font-weight: 600;
+      color: $primary-green;
+      text-decoration: none;
+    }
+  }
+
+  .rewards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+
+    .reward-card {
+      background-color: $white;
+      border-radius: 18px;
+      padding: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+      display: flex;
+      flex-direction: column;
+
+      .reward-img-container {
+        width: 100%;
+        height: 100px;
+        background: repeating-linear-gradient(45deg, #EFECE6, #EFECE6 10px, #E5E1D8 10px, #E5E1D8 20px);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 12px;
+
+        span {
+          font-size: 11px;
+          color: $text-muted;
+        }
+      }
+
+      .reward-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: $text-dark;
+        margin: 0 0 12px 0;
+      }
+
+      .reward-bottom {
+        margin-top: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        .reward-pts {
+          font-size: 12px;
+          color: $text-muted;
+          font-weight: 500;
+        }
+
+        .redeem-btn {
+          background-color: rgba(27, 77, 62, 0.08);
+          color: $primary-green;
+          border: none;
+          padding: 6px 10px;
+          border-radius: 8px;
+          font-size: 11px;
+          font-weight: 700;
+          cursor: pointer;
+          text-align: center;
+        }
+
+        .reward-status {
+          font-size: 11px;
+          color: $primary-green;
+          font-weight: 650;
+        }
+      }
+    }
+  }
+}
+
+.homepage-content {
+  --background: #F7F5F0;
+  --padding-bottom: 110px; /* Adds space at the bottom so the last items aren't covered by the tab bar */
+  padding: 16px 24px;
+}

@@ -1,0 +1,116 @@
+<ion-content [fullscreen]="true" class="homepage-content">
+  <!-- App Header -->
+  <div class="app-header">
+    <h1 class="brand-logo">[BRAND]</h1>
+    <div class="header-right">
+      <button class="notification-btn" aria-label="Notifications">
+        <ion-icon name="notifications-outline"></ion-icon>
+        <span class="notification-badge"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Greeting -->
+  <div class="greeting-section">
+    <p class="greeting-subtitle">Good morning,</p>
+    <h2 class="user-name">Aisyah</h2>
+  </div>
+
+  <!-- Member Card Widget -->
+  <section class="member-card">
+    <div class="card-top">
+      <span class="membership-badge">GOLD MEMBER</span>
+      <span class="wallet-balance">Wallet RM 38.50</span>
+    </div>
+    <div class="card-body">
+      <div class="points-info">
+        <span class="points-label">Points</span>
+        <h3 class="points-value">2,450</h3>
+      </div>
+      <button class="qr-btn">
+        <ion-icon name="qr-code-outline"></ion-icon> Show QR
+      </button>
+    </div>
+    <div class="card-footer">
+      <div class="progress-bar-container">
+        <div class="progress-bar" style="width: 82%;"></div>
+      </div>
+      <span class="progress-text">550 pts to Free drink</span>
+    </div>
+    <!-- Decorative background circles -->
+    <div class="card-circle-1"></div>
+    <div class="card-circle-2"></div>
+  </section>
+
+  <!-- Quick Navigation Shortcuts -->
+  <nav class="quick-nav">
+    <a href="#" class="nav-item">
+      <div class="nav-icon">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+      </div>
+      <span>Stamps</span>
+    </a>
+    <a href="#" class="nav-item">
+      <div class="nav-icon">
+        <ion-icon name="ticket-outline"></ion-icon>
+      </div>
+      <span>Vouchers</span>
+    </a>
+    <a href="#" class="nav-item">
+      <div class="nav-icon">
+        <ion-icon name="location-outline"></ion-icon>
+      </div>
+      <span>Stores</span>
+    </a>
+    <a href="#" class="nav-item">
+      <div class="nav-icon">
+        <ion-icon name="person-add-outline"></ion-icon>
+      </div>
+      <span>Refer</span>
+    </a>
+  </nav>
+
+  <!-- Highlight Banner / Promo -->
+  <section class="highlight-banner">
+    <div class="highlight-image-placeholder">
+      <span>Image</span>
+    </div>
+    <div class="highlight-content">
+      <h3 class="highlight-title">[Highlight title]</h3>
+      <p class="highlight-subtitle">[Subtitle set in the admin portal]</p>
+      <a href="#" class="highlight-action">[Button text]</a>
+    </div>
+  </section>
+
+  <!-- Rewards Section -->
+  <section class="rewards-section">
+    <div class="section-header">
+      <h3 class="section-title">Rewards for you</h3>
+      <a href="#" class="see-all-link">See all</a>
+    </div>
+    <div class="rewards-grid">
+      <!-- Reward Card 1 -->
+      <div class="reward-card">
+        <div class="reward-img-container">
+          <span>Reward image</span>
+        </div>
+        <h4 class="reward-title">Free pastry</h4>
+        <div class="reward-bottom">
+          <span class="reward-pts">1,500 pts</span>
+          <button class="redeem-btn">Redeem now</button>
+        </div>
+      </div>
+      <!-- Reward Card 2 -->
+      <div class="reward-card">
+        <div class="reward-img-container">
+          <span>Reward image</span>
+        </div>
+        <h4 class="reward-title">Free drink</h4>
+        <div class="reward-bottom">
+          <span class="reward-pts">3,000 pts</span>
+          <span class="reward-status">550 to go</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</ion-content>
