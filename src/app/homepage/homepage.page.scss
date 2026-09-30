@@ -1,382 +1,373 @@
-/* Variables */
-$bg-color: #F7F5F0;
-$primary-green: #1B4D3E;
-$accent-gold: #E5D3B3;
-$text-dark: #1A1A1A;
-$text-muted: #666666;
-$white: #FFFFFF;
-
+// General Page Configuration
 .homepage-content {
-  --background: #{$bg-color};
-  padding: 16px 24px;
+  --background: #f7f5f0; // Warm creamy background matching the design
+  padding: 16px;
 }
 
-/* Header */
-.app-header {
+// Top Header
+.top-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 0 20px 0;
+  margin-bottom: 12px;
 
-  .brand-logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 22px;
+  .brand-title {
+    font-size: 16px;
+    font-weight: 800;
     letter-spacing: 1px;
-    color: $text-dark;
-    margin: 0;
+    color: #1a1a1a;
   }
 
   .notification-btn {
-    background: $white;
-    border: none;
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
+    background: #ffffff;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    z-index: 10; // Ensures it floats above underlying layout blocks
 
     ion-icon {
       font-size: 18px;
-      color: $text-dark;
+      color: #333;
+      pointer-events: none;
     }
 
-    .notification-badge {
+    .notification-dot {
       position: absolute;
-      top: 10px;
-      right: 11px;
+      top: 8px;
+      right: 9px;
       width: 7px;
       height: 7px;
-      background-color: #D9534F;
+      background: #ff4d4d;
       border-radius: 50%;
+      pointer-events: none;
     }
   }
 }
 
-/* Greeting Section */
+// Greeting
 .greeting-section {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 
-  .greeting-subtitle {
-    font-size: 15px;
-    color: $text-muted;
-    margin: 0 0 4px 0;
-  }
-
-  .user-name {
-    font-family: 'Playfair Display', serif;
-    font-size: 28px;
-    color: $text-dark;
-    font-weight: 700;
+  p {
+    font-size: 14px;
+    color: #88857d;
     margin: 0;
   }
+
+  h2 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 2px 0 0 0;
+    font-family: serif;
+  }
 }
 
-/* Member Card */
-.member-card {
-  background-color: $primary-green;
-  border-radius: 24px;
-  padding: 24px;
-  color: $white;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 10px 25px rgba(27, 77, 62, 0.25);
-  margin-bottom: 24px;
+// Member Card with Dark Green Theme & Wave Design
+.member-card-container {
+  margin-bottom: 20px;
 
-  .card-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
+  .member-card {
+    background: #1b4d3e;
+    border-radius: 20px;
+    padding: 20px;
+    color: #ffffff;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(27, 77, 62, 0.25);
 
-    .membership-badge {
-      background-color: $accent-gold;
-      color: $text-dark;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 5px 10px;
-      border-radius: 6px;
-      letter-spacing: 0.5px;
+    // Decorative wave background circles
+    .wave-circle {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      pointer-events: none; // Crucial so they don't block clicks
+    }
+    .wave-1 {
+      width: 180px;
+      height: 180px;
+      top: -40px;
+      right: -40px;
+    }
+    .wave-2 {
+      width: 260px;
+      height: 260px;
+      top: -80px;
+      right: -80px;
     }
 
-    .wallet-balance {
-      font-size: 13px;
-      font-weight: 500;
-      opacity: 0.9;
-    }
-  }
-
-  .card-body {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-bottom: 20px;
-
-    .points-label {
-      font-size: 13px;
-      opacity: 0.8;
-    }
-
-    .points-value {
-      font-size: 36px;
-      font-weight: 700;
-      line-height: 1.1;
-      letter-spacing: -0.5px;
-      margin: 0;
-    }
-
-    .qr-btn {
-      background-color: $white;
-      color: $text-dark;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 50px;
-      font-size: 13px;
-      font-weight: 600;
+    .card-top {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
 
-      ion-icon {
-        font-size: 16px;
+      .card-tier {
+        background: #e2d2b5;
+        color: #2b3e34;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
       }
-    }
-  }
 
-  .card-footer {
-    .progress-bar-container {
-      width: 100%;
-      height: 6px;
-      background-color: rgba(255, 255, 255, 0.2);
-      border-radius: 3px;
-      overflow: hidden;
-      margin-bottom: 8px;
-
-      .progress-bar {
-        height: 100%;
-        background-color: $accent-gold;
-        border-radius: 3px;
+      .wallet-balance {
+        font-size: 13px;
+        font-weight: 500;
+        color: #e2d2b5;
       }
     }
 
-    .progress-text {
-      font-size: 12px;
-      opacity: 0.85;
+    .card-points-section {
+      position: relative;
+      z-index: 1;
+      margin-bottom: 16px;
+
+      .points-label {
+        font-size: 12px;
+        opacity: 0.8;
+      }
+
+      .points-value {
+        font-size: 36px;
+        font-weight: 700;
+        margin: 2px 0 10px 0;
+        letter-spacing: -0.5px;
+      }
+
+      .progress-bar-container {
+        width: 100%;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 2px;
+        overflow: hidden;
+        margin-bottom: 6px;
+
+        .progress-fill {
+          height: 100%;
+          background: #e2d2b5;
+          border-radius: 2px;
+        }
+      }
+
+      .points-subtext {
+        font-size: 11px;
+        opacity: 0.75;
+        margin: 0;
+      }
     }
-  }
 
-  .card-circle-1 {
-    position: absolute;
-    top: -60px;
-    right: -60px;
-    width: 180px;
-    height: 180px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 50%;
-    pointer-events: none;
-  }
+    .card-bottom {
+      display: flex;
+      justify-content: flex-end;
+      position: relative;
+      z-index: 10; // Ensures button registers clicks above absolute elements
 
-  .card-circle-2 {
-    position: absolute;
-    top: -20px;
-    right: -20px;
-    width: 120px;
-    height: 120px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 50%;
-    pointer-events: none;
+      .qr-btn {
+        background: #ffffff;
+        color: #1b4d3e;
+        border: none;
+        padding: 6px 14px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+        z-index: 10;
+
+        ion-icon {
+          font-size: 14px;
+          pointer-events: none;
+        }
+      }
+    }
   }
 }
 
-/* Quick Navigation */
-.quick-nav {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 24px;
+// Quick Navigation Grid
+.quick-nav-section {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
 
   .nav-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-decoration: none;
-    gap: 8px;
+    cursor: pointer;
 
-    .nav-icon {
-      width: 56px;
-      height: 56px;
-      background-color: $white;
-      border-radius: 18px;
+    .icon-box {
+      width: 52px;
+      height: 52px;
+      background: #ffffff;
+      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.03);
+      margin-bottom: 6px;
 
       ion-icon {
         font-size: 22px;
-        color: $primary-green;
+        color: #2b3e34;
+        pointer-events: none;
       }
     }
 
     span {
       font-size: 12px;
+      color: #333;
       font-weight: 500;
-      color: $text-dark;
     }
   }
 }
 
-/* Highlight Banner */
+// Highlight Banner
 .highlight-banner {
-  background-color: $white;
-  border-radius: 20px;
-  padding: 14px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 12px;
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 28px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  gap: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.03);
+  cursor: pointer;
 
-  .highlight-image-placeholder {
-    width: 72px;
-    height: 72px;
-    background: repeating-linear-gradient(45deg, #EFECE6, #EFECE6 10px, #E5E1D8 10px, #E5E1D8 20px);
-    border-radius: 12px;
+  .banner-image-placeholder {
+    width: 60px;
+    height: 60px;
+    background: #eae6df;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 11px;
+    color: #888;
     flex-shrink: 0;
-
-    span {
-      font-size: 11px;
-      color: $text-muted;
-    }
   }
 
-  .highlight-content {
-    .highlight-title {
-      font-size: 15px;
+  .banner-info {
+    h4 {
+      font-size: 14px;
       font-weight: 700;
-      color: $text-dark;
+      color: #1a1a1a;
       margin: 0 0 2px 0;
     }
 
-    .highlight-subtitle {
+    p {
       font-size: 12px;
-      color: $text-muted;
-      margin: 0 0 6px 0;
+      color: #666;
+      margin: 0 0 4px 0;
     }
 
-    .highlight-action {
+    .banner-link-text {
       font-size: 12px;
       font-weight: 600;
-      color: $primary-green;
-      text-decoration: none;
+      color: #1b4d3e;
     }
   }
 }
 
-/* Rewards Section */
+// Rewards Section
 .rewards-section {
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 
   .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 
-    .section-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 20px;
-      color: $text-dark;
+    h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a1a1a;
       margin: 0;
     }
 
-    .see-all-link {
+    .see-all {
       font-size: 13px;
       font-weight: 600;
-      color: $primary-green;
-      text-decoration: none;
+      color: #1b4d3e;
+      cursor: pointer;
     }
   }
 
   .rewards-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
 
-    .reward-card {
-      background-color: $white;
-      border-radius: 18px;
-      padding: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    .reward-item-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.03);
       display: flex;
       flex-direction: column;
+      justify-content: space-between;
 
-      .reward-img-container {
+      .reward-img-placeholder {
         width: 100%;
-        height: 100px;
-        background: repeating-linear-gradient(45deg, #EFECE6, #EFECE6 10px, #E5E1D8 10px, #E5E1D8 20px);
-        border-radius: 12px;
+        height: 90px;
+        background: #eae6df;
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 12px;
-
-        span {
-          font-size: 11px;
-          color: $text-muted;
-        }
+        font-size: 11px;
+        color: #888;
+        margin-bottom: 8px;
       }
 
-      .reward-title {
-        font-size: 14px;
-        font-weight: 700;
-        color: $text-dark;
-        margin: 0 0 12px 0;
+      h4 {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin: 0 0 8px 0;
       }
 
-      .reward-bottom {
-        margin-top: auto;
+      .reward-footer {
         display: flex;
         flex-direction: column;
-        gap: 6px;
+        gap: 4px;
 
         .reward-pts {
           font-size: 12px;
-          color: $text-muted;
+          color: #666;
           font-weight: 500;
         }
 
-        .redeem-btn {
-          background-color: rgba(27, 77, 62, 0.08);
-          color: $primary-green;
-          border: none;
-          padding: 6px 10px;
-          border-radius: 8px;
-          font-size: 11px;
-          font-weight: 700;
-          cursor: pointer;
-          text-align: center;
+        .pts-left {
+          font-size: 12px;
+          color: #888;
         }
 
-        .reward-status {
+        .redeem-now-btn {
+          background: #eef4f1;
+          color: #1b4d3e;
+          border: none;
+          padding: 5px 10px;
+          border-radius: 8px;
+          font-weight: 600;
           font-size: 11px;
-          color: $primary-green;
-          font-weight: 650;
+          cursor: pointer;
+          text-align: center;
         }
       }
     }
   }
-}
-
-.homepage-content {
-  --background: #F7F5F0;
-  --padding-bottom: 110px; /* Adds space at the bottom so the last items aren't covered by the tab bar */
-  padding: 16px 24px;
 }
