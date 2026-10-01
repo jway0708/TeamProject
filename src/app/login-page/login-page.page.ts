@@ -15,6 +15,7 @@ export class LoginPage {
   referralCode: string = '';
   isRegister: boolean = false;
   countdown: number = 0;
+  private otpRequestedFor: string | null = null;
   private timer: any;
 
   constructor(
@@ -27,6 +28,7 @@ export class LoginPage {
   resetForm() {
     this.otpCode = '';
     this.referralCode = '';
+    this.otpRequestedFor = null;
   }
 
   // 1. 失去焦点时校验推荐码
@@ -44,7 +46,8 @@ export class LoginPage {
 
   // 2. 发送 OTP 验证码
   async onSendOtp() {
-    if (!this.phoneNumber) {
+    const phone = this.phoneNumber.trim();
+    if (!phone) {
       this.showToast('Please enter your phone number first.');
       return;
     }
@@ -52,15 +55,16 @@ export class LoginPage {
     const loading = await this.loadingCtrl.create({ message: 'Sending OTP...' });
     await loading.present();
 
-    this.apiService.requestOtp(this.phoneNumber, this.isRegister).subscribe({
+    this.apiService.requestOtp(phone, this.isRegister).subscribe({
       next: async (res) => {
         await loading.dismiss();
+        this.otpRequestedFor = phone;
         this.showToast('OTP sent successfully!');
         this.startCountdown();
       },
       error: async (err) => {
         await loading.dismiss();
-        this.showToast('Failed to send OTP: ' + (err.error?.message || 'Please try again.'));
+        this.showToast('Failed to send OTP: ' + (err.error?.message || err.message || 'Please try again.'));
       }
     });
   }
@@ -77,11 +81,18 @@ export class LoginPage {
 
   // 3. 提交登录或注册
   async onSubmit() {
+    const phone = this.phoneNumber.trim();
+
+    if (!this.otpRequestedFor || this.otpRequestedFor !== phone) {
+      this.showToast('Please request an OTP for this phone number first.');
+      return;
+    }
+
     const loading = await this.loadingCtrl.create({ message: 'Processing...' });
     await loading.present();
 
     this.apiService.loginOrRegister(
-      this.phoneNumber,
+      phone,
       this.otpCode,
       this.referralCode,
       this.isRegister
@@ -89,15 +100,15 @@ export class LoginPage {
       next: async (res) => {
         await loading.dismiss();
         // 保存当前用户手机号到本地存储
-        localStorage.setItem('user_phone', this.phoneNumber);
+        localStorage.setItem('user_phone', phone);
         
         this.showToast('Operation successful!');
         // 跳转至首页
-        this.router.navigateByUrl('/home');
+        this.router.navigateByUrl('/homepage');
       },
       error: async (err) => {
         await loading.dismiss();
-        this.showToast('Verification failed: ' + (err.error?.message || 'Invalid OTP.'));
+        this.showToast('Verification failed: ' + (err.error?.message || err.message || 'Invalid OTP.'));
       }
     });
   }

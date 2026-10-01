@@ -1,0 +1,7 @@
+{
+  "/api": {
+    "target": "https://xcodeappapi.xcode.com.my",
+    "secure": true,
+    "changeOrigin": true
+  }
+}

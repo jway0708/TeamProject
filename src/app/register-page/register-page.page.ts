@@ -14,6 +14,7 @@ export class RegisterPagePage {
   otpCode: string = '';
   referralCode: string = '';
   countdown: number = 0;
+  private otpRequestedFor: string | null = null;
   private timer: any;
 
   constructor(
@@ -38,7 +39,8 @@ export class RegisterPagePage {
 
   // 2. 发送注册 OTP 验证码
   async onSendOtp() {
-    if (!this.phoneNumber) {
+    const phone = this.phoneNumber.trim();
+    if (!phone) {
       this.showToast('Please enter your phone number first.');
       return;
     }
@@ -47,15 +49,16 @@ export class RegisterPagePage {
     await loading.present();
 
     // isRegister 参数传 true
-    this.apiService.requestOtp(this.phoneNumber, true).subscribe({
+    this.apiService.requestOtp(phone, true).subscribe({
       next: async (res) => {
         await loading.dismiss();
+        this.otpRequestedFor = phone;
         this.showToast('OTP sent successfully!');
         this.startCountdown();
       },
       error: async (err) => {
         await loading.dismiss();
-        this.showToast('Failed to send OTP: ' + (err.error?.message || 'Please try again.'));
+        this.showToast('Failed to send OTP: ' + (err.error?.message || err.message || 'Please try again.'));
       }
     });
   }
@@ -72,26 +75,33 @@ export class RegisterPagePage {
 
   // 3. 提交注册
   async onSubmit() {
+    const phone = this.phoneNumber.trim();
+
+    if (!this.otpRequestedFor || this.otpRequestedFor !== phone) {
+      this.showToast('Please request an OTP for this phone number first.');
+      return;
+    }
+
     const loading = await this.loadingCtrl.create({ message: 'Registering...' });
     await loading.present();
 
     // isRegister 参数传 true
     this.apiService.loginOrRegister(
-      this.phoneNumber,
+      phone,
       this.otpCode,
       this.referralCode,
       true
     ).subscribe({
       next: async (res) => {
         await loading.dismiss();
-        localStorage.setItem('user_phone', this.phoneNumber);
+        localStorage.setItem('user_phone', phone);
         
         this.showToast('Registration successful!');
-        this.router.navigateByUrl('/home');
+        this.router.navigateByUrl('/homepage');
       },
       error: async (err) => {
         await loading.dismiss();
-        this.showToast('Registration failed: ' + (err.error?.message || 'Invalid OTP.'));
+        this.showToast('Registration failed: ' + (err.error?.message || err.message || 'Invalid OTP.'));
       }
     });
   }
