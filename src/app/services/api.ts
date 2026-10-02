@@ -1,19 +1,21 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, map, switchMap, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { Capacitor } from '@capacitor/core';
+import { decodeResponse, loginConfirmed } from './api-response';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
-  private readonly baseUrl = environment.apiBaseUrl.trim().replace(/\/+$/, '');
+  private readonly baseUrl = (Capacitor.isNativePlatform() ? 'https://xcodeappapi.xcode.com.my/api' : environment.apiBaseUrl).trim().replace(/\/+$/, '');
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // 1. 校验推荐码
   checkReferralCode(code: string): Observable<any> {
-    return this.post('/MemberWallet/CheckReffererCodeValid', { ReferralCode: code });
+    return this.post('/MemberWallet/CheckReffererCodeValid', { ReferralBy: code });
   }
 
   // 2. 发送注册/登录 OTP
@@ -28,11 +30,15 @@ export class ApiService {
   // 3. 提交注册/登录
   loginOrRegister(phone: string, otp: string, referralCode?: string, isRegister: boolean = false): Observable<any> {
     const endpoint = isRegister ? '/MemberLogin/RegisterMember' : '/MemberLogin/MemberMobileLoginGetProfile';
-    return this.post(endpoint, {
-      PhoneNumber: phone,
-      OtpCode: otp,
-      ReferralCode: referralCode || ''
-    });
+    // Send the field names defined by RegisterMemberParam and LoginData in Swagger.
+    const body = isRegister
+      ? { PhoneNumber: phone, ReferralBy: referralCode || '' }
+      : { Phone: phone, OTP: String(otp), FirstLogin: false, DeviceId: this.getClientDeviceId() };
+    if (isRegister) {
+      // RegisterMember has no OTP parameter. Confirm the code before creating an account.
+      return this.verifyOtp(phone, otp, true).pipe(switchMap(() => this.post(endpoint, body)));
+    }
+    return this.verifyOtp(phone, otp, false);
   }
 
   // 4. 获取会员完整数据 (会员卡/余额/积分)
@@ -50,17 +56,38 @@ export class ApiService {
 
   // 6. 保持登录态 (Keep Login)
   keepLoginUser(phone: string): Observable<any> {
-    return this.post('/MemberAccount/KeepLoginUser', { PhoneNumber: phone });
+    return this.post('/MemberAccount/KeepLoginUser', { PhoneNumber: phone, DeviceId: this.getClientDeviceId() });
   }
 
-  private post<T = unknown>(path: string, body: unknown): Observable<T> {
+  verifyOtp(phone: string, otp: string, firstLogin = false): Observable<unknown> {
+    return this.post('/MemberLogin/MemberMobileLoginGetProfile', {
+      Phone: phone, OTP: String(otp), FirstLogin: firstLogin, DeviceId: this.getClientDeviceId(),
+    }).pipe(map(response => {
+      if (!loginConfirmed(response, phone)) throw new Error('The API did not confirm OTP verification. Please check the response with the API owner.');
+      return response;
+    }));
+  }
+
+  loginWithEmail(email: string, password: string): Observable<unknown> {
+    return this.post('/MemberLogin/CheckEmailPassword', { Email: email, Password: password }).pipe(map(response => {
+      if (!loginConfirmed(response)) throw new Error('Email login was not confirmed by the API.');
+      return response;
+    }));
+  }
+
+  get(path: string): Observable<unknown> {
+    return this.http.get(`${this.baseUrl}${path}`, { responseType: 'text' }).pipe(map(decodeResponse));
+  }
+
+  post<T = unknown>(path: string, body: unknown): Observable<T> {
     if (!this.baseUrl) {
       return throwError(() => new Error('API address is missing. Set apiBaseUrl in the environment file.'));
     }
-    return this.http.post<T>(`${this.baseUrl}${path}`, body);
+    return this.http.post(`${this.baseUrl}${path}`, body, { responseType: 'text' }).pipe(map(raw => decodeResponse(raw) as T));
   }
 
   private getClientDeviceId(): string {
+    if (Capacitor.isNativePlatform()) return localStorage.getItem('push_device_id') || '';
     const storageKey = 'client_device_id';
     let deviceId = localStorage.getItem(storageKey);
     if (!deviceId) {

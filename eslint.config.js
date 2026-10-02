@@ -10,6 +10,8 @@ module.exports = tseslint.config(
     processor: angular.processInlineTemplates,
     rules: {
       "@angular-eslint/prefer-standalone": "off",
+      // Keep constructor injection supported by the existing NgModule-based pages.
+      "@angular-eslint/prefer-inject": "off",
       "@angular-eslint/component-class-suffix": [
         "error",
         { suffixes: ["Page", "Component"] },
@@ -27,6 +29,7 @@ module.exports = tseslint.config(
   {
     files: ["**/*.html"],
     extends: [...angular.configs.templateRecommended],
-    rules: {},
+    // Existing Ionic pages use structural directives; no framework migration is required.
+    rules: { "@angular-eslint/template/prefer-control-flow": "off" },
   }
 );

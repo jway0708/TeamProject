@@ -19,7 +19,13 @@
       </ion-segment-button>
     </ion-segment>
 
-    <form (ngSubmit)="onSubmit()" class="ion-margin-top">
+    <ion-button fill="clear" (click)="emailMode = !emailMode">{{ emailMode ? 'Use phone OTP' : 'Use email and password' }}</ion-button>
+    <form *ngIf="emailMode" (ngSubmit)="emailLogin()">
+      <ion-item><ion-input label="Email" type="email" [(ngModel)]="email" name="email" required></ion-input></ion-item>
+      <ion-item><ion-input label="Password" type="password" [(ngModel)]="password" name="password" required></ion-input></ion-item>
+      <ion-button type="submit" expand="block" [disabled]="!email || !password">Sign in</ion-button>
+    </form>
+    <form *ngIf="!emailMode" (ngSubmit)="onSubmit()" class="ion-margin-top">
       <!-- Phone Number -->
       <ion-item lines="none">
         <ion-label position="stacked">Phone Number</ion-label>
@@ -46,5 +52,6 @@
         {{ isRegister ? 'Register' : 'Login' }}
       </ion-button>
     </form>
+    <ion-button fill="clear" routerLink="/forgot-password">Forgot password?</ion-button>
   </div>
 </ion-content>

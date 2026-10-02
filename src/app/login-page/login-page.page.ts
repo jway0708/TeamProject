@@ -1,7 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastController, LoadingController } from '@ionic/angular';
 import { ApiService } from '../services/api';
+import { MemberSession } from '../services/member-session';
+import { AndroidMember } from '../services/android-member';
+import { field } from '../services/api-response';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-login-page',
@@ -9,7 +13,10 @@ import { ApiService } from '../services/api';
   styleUrls: ['./login-page.page.scss'],
   standalone: false,
 })
-export class LoginPage {
+export class LoginPage implements OnDestroy {
+  emailMode = false;
+  email = '';
+  password = '';
   phoneNumber: string = '';
   otpCode: string = '';
   referralCode: string = '';
@@ -22,10 +29,14 @@ export class LoginPage {
     private apiService: ApiService,
     private router: Router,
     private toastCtrl: ToastController,
-    private loadingCtrl: LoadingController
+    private loadingCtrl: LoadingController,
+    private session: MemberSession,
+    private android: AndroidMember,
   ) {}
 
   resetForm() {
+    clearInterval(this.timer);
+    this.countdown = 0;
     this.otpCode = '';
     this.referralCode = '';
     this.otpRequestedFor = null;
@@ -70,6 +81,7 @@ export class LoginPage {
   }
 
   startCountdown() {
+    clearInterval(this.timer);
     this.countdown = 60;
     this.timer = setInterval(() => {
       this.countdown--;
@@ -99,12 +111,24 @@ export class LoginPage {
     ).subscribe({
       next: async (res) => {
         await loading.dismiss();
+        if (this.isRegister) {
+          this.isRegister = false;
+          this.resetForm();
+          this.showToast('Registration submitted. Please sign in with a new OTP to load your profile.');
+          return;
+        }
         // 保存当前用户手机号到本地存储
-        localStorage.setItem('user_phone', phone);
+        try {
+          await this.session.establish(phone);
+        } catch (error) {
+          this.showToast(error instanceof Error ? error.message : 'Unable to load your profile.');
+          return;
+        }
+        void this.android.registerPush(phone);
         
         this.showToast('Operation successful!');
         // 跳转至首页
-        this.router.navigateByUrl('/homepage');
+        this.router.navigateByUrl('/tabs/homepage');
       },
       error: async (err) => {
         await loading.dismiss();
@@ -112,6 +136,24 @@ export class LoginPage {
       }
     });
   }
+
+  async emailLogin() {
+    if (!this.email.trim() || !this.password) return;
+    const loading = await this.loadingCtrl.create({ message: 'Signing in...' });
+    await loading.present();
+    try {
+      const response = await firstValueFrom(this.apiService.loginWithEmail(this.email.trim(), this.password));
+      const data = field(response, 'Data') || response;
+      const phone = field(data, 'PhoneNumber', 'Phone');
+      if (typeof phone !== 'string' || !phone.trim()) throw new Error('The login response does not include your phone number.');
+      await this.session.establish(phone);
+      this.password = '';
+      void this.android.registerPush(phone);
+      await this.router.navigateByUrl('/tabs/homepage');
+    } catch (error) { this.showToast(error instanceof Error ? error.message : 'Unable to sign in.'); }
+    finally { await loading.dismiss(); }
+  }
+  ngOnDestroy() { clearInterval(this.timer); }
 
   private async showToast(msg: string) {
     const toast = await this.toastCtrl.create({

@@ -1,0 +1,72 @@
+:host {
+    display: flex;
+    flex-direction: column;
+}
+
+ion-content {
+    --background: #f7f5f0;
+}
+
+ion-toolbar {
+    --background: #fff;
+    --color: #1b4d3e;
+}
+
+ion-button {
+    --background: #1b4d3e;
+}
+
+ion-card {
+    border-radius: 16px;
+    margin: 16px 0;
+}
+
+ion-card-title {
+    font-size: 18px;
+}
+
+.message {
+    padding: 12px;
+    border-radius: 12px;
+    background: #e9f0ec;
+}
+
+.error {
+    background: #fff0ef;
+    color: #9b2424;
+}
+
+.qr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 0;
+}
+
+.qr img {
+    width: min(100%, 360px);
+    background: #fff;
+    border-radius: 16px;
+}
+
+.referral {
+    text-align: center;
+    padding: 16px;
+}
+
+.photo {
+    display: block;
+    margin: 20px 0;
+}
+
+.photo input {
+    display: block;
+    margin-top: 8px;
+}
+
+.photo-preview {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 50%;
+}

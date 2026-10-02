@@ -1,14 +1,16 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { memberGuard } from './services/member-session';
 
 const routes: Routes = [
   {
     path: 'home',
-    loadChildren: () => import('./home/home.module').then( m => m.HomePageModule)
+    redirectTo: 'tabs/homepage',
+    pathMatch: 'full'
   },
   {
     path: '',
-    redirectTo: 'homepage',
+    redirectTo: 'tabs/homepage',
     pathMatch: 'full'
   },
   {
@@ -21,11 +23,15 @@ const routes: Routes = [
   },
   {
     path: 'homepage',
-    loadChildren: () => import('./homepage/homepage.module').then( m => m.HomepagePageModule)
+    redirectTo: 'tabs/homepage',
+    pathMatch: 'full'
   },  {
     path: 'tabs',
     loadChildren: () => import('./tabs/tabs.module').then( m => m.TabsPageModule)
   },
+  { path: 'member-qr', canActivate: [memberGuard], loadComponent: () => import('./member/member.page').then(m => m.MemberPage), data: { area: 'qr' } },
+  { path: 'forgot-password', loadComponent: () => import('./account/reset.page').then(m => m.ResetPage) },
+  { path: '**', redirectTo: 'tabs/homepage' },
 
 
 ];

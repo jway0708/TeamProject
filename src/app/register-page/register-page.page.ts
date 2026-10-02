@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastController, LoadingController } from '@ionic/angular';
 import { ApiService } from '../services/api';
@@ -9,7 +9,7 @@ import { ApiService } from '../services/api';
   styleUrls: ['./register-page.page.scss'],
   standalone: false,
 })
-export class RegisterPagePage {
+export class RegisterPagePage implements OnDestroy {
   phoneNumber: string = '';
   otpCode: string = '';
   referralCode: string = '';
@@ -22,7 +22,7 @@ export class RegisterPagePage {
     private router: Router,
     private toastCtrl: ToastController,
     private loadingCtrl: LoadingController
-  ) {}
+  ) { }
 
   // 1. 失去焦点时校验推荐码
   onCheckReferral() {
@@ -64,6 +64,7 @@ export class RegisterPagePage {
   }
 
   startCountdown() {
+    clearInterval(this.timer);
     this.countdown = 60;
     this.timer = setInterval(() => {
       this.countdown--;
@@ -94,10 +95,8 @@ export class RegisterPagePage {
     ).subscribe({
       next: async (res) => {
         await loading.dismiss();
-        localStorage.setItem('user_phone', phone);
-        
-        this.showToast('Registration successful!');
-        this.router.navigateByUrl('/homepage');
+        this.showToast('Registration submitted. Please sign in with an OTP to load your profile.');
+        this.router.navigateByUrl('/login-page');
       },
       error: async (err) => {
         await loading.dismiss();
@@ -110,6 +109,7 @@ export class RegisterPagePage {
   goToLogin() {
     this.router.navigateByUrl('/login-page');
   }
+  ngOnDestroy() { clearInterval(this.timer); }
 
   private async showToast(msg: string) {
     const toast = await this.toastCtrl.create({

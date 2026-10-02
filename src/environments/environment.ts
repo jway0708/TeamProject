@@ -4,6 +4,7 @@
 
 export const environment = {
   production: false,
+  pushEnabled: false,
   apiBaseUrl: '/api',
 };
 
