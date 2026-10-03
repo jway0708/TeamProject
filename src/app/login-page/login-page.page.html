@@ -13,17 +13,20 @@
       <ion-button type="button">Login</ion-button>
       <ion-button type="button" fill="outline" routerLink="/register-page">Register</ion-button>
     </div>
-    <ion-button fill="clear" (click)="emailMode = !emailMode">{{ emailMode ? 'Use phone OTP' : 'Use email and password' }}</ion-button>
+    <ion-button fill="clear" (click)="emailMode = !emailMode">{{ emailMode ? 'Use phone OTP' : 'Use email and password'
+      }}</ion-button>
     <form *ngIf="emailMode" (ngSubmit)="emailLogin()">
       <ion-item><ion-input label="Email" type="email" [(ngModel)]="email" name="email" required></ion-input></ion-item>
-      <ion-item><ion-input label="Password" type="password" [(ngModel)]="password" name="password" required></ion-input></ion-item>
+      <ion-item><ion-input label="Password" type="password" [(ngModel)]="password" name="password"
+          required></ion-input></ion-item>
       <ion-button type="submit" expand="block" [disabled]="!email || !password">Sign in</ion-button>
     </form>
     <form *ngIf="!emailMode" (ngSubmit)="onSubmit()" class="ion-margin-top">
       <!-- Phone Number -->
       <ion-item lines="none">
         <ion-label position="stacked">Phone Number</ion-label>
-        <ion-input type="tel" [(ngModel)]="phoneNumber" name="phoneNumber" placeholder="e.g. +60 12-345 6789" required></ion-input>
+        <ion-input type="tel" [(ngModel)]="phoneNumber" name="phoneNumber" placeholder="e.g. +60 12-345 6789"
+          required></ion-input>
       </ion-item>
 
       <!-- OTP Code + Get OTP Button -->
@@ -36,7 +39,8 @@
       </ion-item>
 
       <!-- Submit Button -->
-      <ion-button expand="block" type="button" class="ion-margin-top" (click)="onSubmit()" [disabled]="!phoneNumber || !otpCode">
+      <ion-button expand="block" type="button" class="ion-margin-top" (click)="onSubmit()"
+        [disabled]="!phoneNumber || !otpCode">
         Login
       </ion-button>
     </form>

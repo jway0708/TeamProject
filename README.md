@@ -1,5 +1,14 @@
 # Ionic Android 会员 App
 
+本地开发可用一条命令同时启动前端（http://localhost:8100）和授权后端：
+
+```powershell
+npm run dev
+```
+
+先在 `server/.env` 配置 Token。启动前请停止原来的 `ionic serve` 和 `npm run start:api`，避免端口冲突。
+按 Ctrl+C 会停止两个服务；其中一个退出时另一个也会停止。
+
 范围为 requirementTraining.docx 的 Member app functions。会员 App 包含登录注册、首页、会员 QR、
 钱包、奖励／优惠券、集点、交易历史、推荐、通知、门店、资料与反馈。没有加入 Web 产品、商家 POS 或 Admin Portal。
 文档中的点餐／配送属于可选功能，目前不在实现范围。

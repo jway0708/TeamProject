@@ -1,17 +1,50 @@
 <ion-content class="homepage-content">
-  <div class="top-header"><div class="brand-title">MEMBER</div><button class="notification-btn" (click)="openNotifications()" aria-label="Notifications"><ion-icon name="notifications-outline"></ion-icon></button></div>
+  <div class="top-header">
+    <div class="brand-title">MEMBER</div><button class="notification-btn" (click)="openNotifications()"
+      aria-label="Notifications"><ion-icon name="notifications-outline"></ion-icon></button>
+  </div>
   <p *ngIf="loading" role="status">Loading your profile...</p>
-  <div *ngIf="profileError" role="alert"><p>{{ profileError }}</p><ion-button fill="clear" (click)="loadMember()">Retry</ion-button><ion-button fill="clear" routerLink="/login-page">Sign in</ion-button></div>
-  <div class="greeting-section"><p>Welcome,</p><h2>{{ member?.name || 'Guest' }}</h2><p *ngIf="member">{{ member.phone }}</p><ion-button *ngIf="!member && !loading" fill="clear" routerLink="/login-page">Sign in to view your member details</ion-button></div>
-  <div class="member-card-container" *ngIf="member"><div class="member-card">
-    <div class="card-top"><span class="card-tier">{{ member.tier | uppercase }}</span><button class="wallet-balance" routerLink="/tabs/wallet">Wallet {{ member.balance === null ? '—' : ('RM ' + (member.balance | number:'1.2-2')) }}</button></div>
-    <div class="card-points-section"><span>Points</span><h1>{{ member.points === null ? '—' : (member.points | number:'1.0-0') }}</h1><p>Stamps: {{ member.stamps === null ? '—' : member.stamps }}</p></div>
-    <div class="card-bottom"><button class="qr-btn" (click)="showQRCode()"><ion-icon name="qr-code-outline"></ion-icon> Show QR</button></div>
-  </div></div>
-  <div class="quick-nav-section"><a *ngFor="let shortcut of shortcuts" [routerLink]="shortcut.url"><div class="icon-box"><ion-icon [name]="shortcut.icon"></ion-icon></div><span>{{ shortcut.label }}</span></a></div>
-  <p *ngIf="contentError" role="alert">{{ contentError }} <ion-button fill="clear" (click)="loadContent()">Retry</ion-button></p>
-  <div class="highlight-banner" *ngFor="let banner of banners" routerLink="/tabs/highlight"><img *ngIf="image(banner)" [src]="image(banner)" alt="Promotion"><div><h4>{{ read(banner, 'Title') }}</h4><p>{{ read(banner, 'SubTitle') }}</p><span>{{ read(banner, 'ButtonText') || 'Details' }}</span></div></div>
-  <div class="section-header"><h3>Rewards for you</h3><a routerLink="/tabs/rewards">See all</a></div>
-  <div class="rewards-grid"><a class="reward-item-card" *ngFor="let reward of rewards" routerLink="/tabs/rewards"><img *ngIf="image(reward)" [src]="image(reward)" alt="Reward"><h4>{{ read(reward, 'Name', 'Title') }}</h4><span>{{ read(reward, 'Point') }} pts</span><span>View reward</span></a></div>
+  <div *ngIf="profileError" role="alert">
+    <p>{{ profileError }}</p><ion-button fill="clear" (click)="loadMember()">Retry</ion-button><ion-button fill="clear"
+      routerLink="/login-page">Sign in</ion-button>
+  </div>
+  <div class="greeting-section">
+    <p>Welcome,</p>
+    <h2>{{ member?.name || 'Guest' }}</h2>
+    <p *ngIf="member">{{ member.phone }}</p><ion-button *ngIf="!member && !loading" fill="clear"
+      routerLink="/login-page">Sign in to view your member details</ion-button>
+  </div>
+  <div class="member-card-container" *ngIf="member">
+    <div class="member-card">
+      <div class="card-top"><span class="card-tier">{{ member.tier | uppercase }}</span><button class="wallet-balance"
+          routerLink="/tabs/wallet">Wallet {{ member.balance === null ? '—' : ('RM ' + (member.balance |
+          number:'1.2-2')) }}</button></div>
+      <div class="card-points-section"><span>Points</span>
+        <h1>{{ member.points === null ? '—' : (member.points | number:'1.0-0') }}</h1>
+        <p>Stamps: {{ member.stamps === null ? '—' : member.stamps }}</p>
+      </div>
+      <div class="card-bottom"><button class="qr-btn" (click)="showQRCode()"><ion-icon
+            name="qr-code-outline"></ion-icon> Show QR</button></div>
+    </div>
+  </div>
+  <div class="quick-nav-section"><a *ngFor="let shortcut of shortcuts" [routerLink]="shortcut.url">
+      <div class="icon-box"><ion-icon [name]="shortcut.icon"></ion-icon></div><span>{{ shortcut.label }}</span>
+    </a></div>
+  <p *ngIf="contentError" role="alert">{{ contentError }} <ion-button fill="clear"
+      (click)="loadContent()">Retry</ion-button></p>
+  <div class="highlight-banner" *ngFor="let banner of banners" routerLink="/tabs/highlight"><img *ngIf="image(banner)"
+      [src]="image(banner)" alt="Promotion">
+    <div>
+      <h4>{{ read(banner, 'Title') }}</h4>
+      <p>{{ read(banner, 'SubTitle') }}</p><span>{{ read(banner, 'ButtonText') || 'Details' }}</span>
+    </div>
+  </div>
+  <div class="section-header">
+    <h3>Rewards for you</h3><a routerLink="/tabs/rewards">See all</a>
+  </div>
+  <div class="rewards-grid"><a class="reward-item-card" *ngFor="let reward of rewards" routerLink="/tabs/rewards"><img
+        *ngIf="image(reward)" [src]="image(reward)" alt="Reward">
+      <h4>{{ read(reward, 'Name', 'Title') }}</h4><span>{{ read(reward, 'Point') }} pts</span><span>View reward</span>
+    </a></div>
   <p *ngIf="!loading && !rewards.length && !contentError">No rewards available.</p>
 </ion-content>

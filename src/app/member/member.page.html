@@ -1,7 +1,20 @@
-<ion-header><ion-toolbar><ion-buttons slot="start"><ion-back-button
+<ion-header *ngIf="area !== 'qr'"><ion-toolbar><ion-buttons slot="start"><ion-back-button
         defaultHref="/tabs/homepage"></ion-back-button></ion-buttons><ion-title>{{ title
       }}</ion-title></ion-toolbar></ion-header>
-<ion-content class="ion-padding">
+<ion-content class="ion-padding" [class.counter-content]="area === 'qr'">
+  <section *ngIf="area === 'qr'" class="counter-page">
+    <div class="counter-top"><span class="counter-brand">MEMBER</span><div class="counter-top-actions"><span class="counter-tier">{{ session.profile?.tier || 'Member' }}</span><a routerLink="/tabs/notifications" aria-label="Notifications"><ion-icon name="notifications-outline"></ion-icon></a></div></div>
+    <h1>Show this at the counter</h1>
+    <p class="counter-description">Staff scan it to add points and stamps, top up your wallet or take a payment.</p>
+    <div class="counter-qr-card" *ngIf="qrImage"><img [src]="qrImage" alt="Your member QR code"><p>{{ session.profile?.name }} <span>· · · · {{ session.phone.slice(-4) }}</span></p></div>
+    <p class="counter-scan-hint" *ngIf="qrImage"><ion-icon name="sunny-outline"></ion-icon> Keep your screen bright for easy scanning</p>
+    <div class="counter-stats" *ngIf="session.profile as member">
+      <div><span>POINTS</span><strong>{{ member.points === null ? '—' : (member.points | number:'1.0-0') }}</strong></div>
+      <div><span>WALLET</span><strong>{{ member.balance === null ? '—' : ('RM ' + (member.balance | number:'1.2-2')) }}</strong></div>
+      <div><span>STAMPS</span><strong>{{ member.stamps === null ? '—' : member.stamps }}</strong></div>
+    </div>
+    <div class="counter-actions"><a class="counter-redeem" routerLink="/tabs/rewards"><ion-icon name="gift-outline"></ion-icon>Redeem a reward</a><a routerLink="/tabs/history"><ion-icon name="time-outline"></ion-icon>History</a></div>
+  </section>
   <ion-progress-bar *ngIf="loading" type="indeterminate"></ion-progress-bar>
   <div *ngIf="error" role="alert" class="message error">{{ error }} <ion-button fill="clear"
       (click)="load()">Retry</ion-button></div>
@@ -37,7 +50,8 @@
     <ion-item><ion-input label="Email" type="email" [(ngModel)]="email" name="email"></ion-input></ion-item>
     <ion-item><ion-input label="Birthday" type="date" [(ngModel)]="birthday" name="birthday"></ion-input></ion-item>
     <label class="photo">Profile photo <input type="file" accept="image/*" (change)="choosePhoto($event)"></label>
-    <img *ngIf="photo" class="photo-preview" [src]="'data:' + photoMime + ';base64,' + photo" alt="Selected profile photo">
+    <img *ngIf="photo" class="photo-preview" [src]="'data:' + photoMime + ';base64,' + photo"
+      alt="Selected profile photo">
     <ion-button type="submit" expand="block" [disabled]="loading || !name.trim()">Save profile</ion-button>
     <ion-button fill="clear" (click)="emailOtp()">Request email verification</ion-button>
     <p>Contact support to complete email verification.</p>
@@ -51,14 +65,15 @@
     <ion-item><ion-textarea label="Feedback" [(ngModel)]="description" name="description"
         required></ion-textarea></ion-item>
     <ion-item><ion-input label="Category" [(ngModel)]="category" name="category"></ion-input></ion-item>
-    <ion-item><ion-input label="Store or location" [(ngModel)]="feedbackLocation" name="location"></ion-input></ion-item>
+    <ion-item><ion-input label="Store or location" [(ngModel)]="feedbackLocation"
+        name="location"></ion-input></ion-item>
     <ion-item><ion-select label="Rating" [(ngModel)]="rating" name="rating"><ion-select-option
           *ngFor="let value of ['1','2','3','4','5']" [value]="value">{{ value
           }}</ion-select-option></ion-select></ion-item>
     <ion-button type="submit" [disabled]="loading">Send feedback</ion-button>
     <h2>Past feedback</h2>
   </form>
-  <section *ngIf="qrImage" class="qr">
+  <section *ngIf="qrImage && area !== 'qr'" class="qr">
     <h2>{{ qrTitle }}</h2><img [src]="qrImage" alt="QR code for the counter">
     <p *ngIf="area === 'qr'">{{ session.phone }}</p>
   </section>

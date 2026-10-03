@@ -1,64 +1,31 @@
 <ion-tabs>
   <ion-tab-bar slot="bottom" class="custom-tab-bar">
-    
-    <!-- Home Tab -->
     <ion-tab-button tab="homepage" href="/tabs/homepage">
       <div class="tab-content">
-        <div class="tab-circle">
-          <ion-icon name="home-outline"></ion-icon>
-        </div>
-        <span>Home</span>
-        <svg class="tab-wave" viewBox="0 0 56 20">
-          <path d="M2,16 Q28,2 54,16" />
-        </svg>
+        <div class="tab-circle"><ion-icon name="home-outline"></ion-icon></div>
+        <span>Home</span><svg class="tab-wave" viewBox="0 0 56 20" aria-hidden="true"><path d="M2,16 Q28,2 54,16" /></svg>
       </div>
     </ion-tab-button>
-
-    <!-- Rewards / Menu Tab -->
     <ion-tab-button tab="rewards" href="/tabs/rewards">
       <div class="tab-content">
-        <div class="tab-circle">
-          <ion-icon name="gift-outline"></ion-icon>
-        </div>
-        <span>Rewards</span>
-        <svg class="tab-wave" viewBox="0 0 56 20">
-          <path d="M2,16 Q28,2 54,16" />
-        </svg>
+        <div class="tab-circle"><ion-icon name="gift-outline"></ion-icon></div>
+        <span>Rewards</span><svg class="tab-wave" viewBox="0 0 56 20" aria-hidden="true"><path d="M2,16 Q28,2 54,16" /></svg>
       </div>
     </ion-tab-button>
-
-    <!-- Center QR Floating Action Button -->
     <ion-tab-button tab="qr" href="/tabs/qr" class="center-qr-tab" aria-label="Member QR">
-      <div class="tab-content"><div class="tab-circle">
-        <ion-icon name="qr-code"></ion-icon></div><span>QR</span><svg class="tab-wave" viewBox="0 0 56 20"><path d="M2,16 Q28,2 54,16" /></svg>
-      </div>
+      <div class="qr-fab-container"><ion-icon name="qr-code"></ion-icon></div>
     </ion-tab-button>
-    
-    <!-- History Tab -->
     <ion-tab-button tab="history" href="/tabs/history">
       <div class="tab-content">
-        <div class="tab-circle">
-          <ion-icon name="time-outline"></ion-icon>
-        </div>
-        <span>History</span>
-        <svg class="tab-wave" viewBox="0 0 56 20">
-          <path d="M2,16 Q28,2 54,16" />
-        </svg>
+        <div class="tab-circle"><ion-icon name="time-outline"></ion-icon></div>
+        <span>History</span><svg class="tab-wave" viewBox="0 0 56 20" aria-hidden="true"><path d="M2,16 Q28,2 54,16" /></svg>
       </div>
     </ion-tab-button>
-
-    <!-- Profile Tab -->
     <ion-tab-button tab="profile" href="/tabs/profile">
       <div class="tab-content">
-        <div class="tab-circle">
-          <ion-icon name="person-outline"></ion-icon>
-        </div>
-        <span>Profile</span>
-        <svg class="tab-wave" viewBox="0 0 56 20">
-          <path d="M2,16 Q28,2 54,16" />
-        </svg>
+        <div class="tab-circle"><ion-icon name="person-outline"></ion-icon></div>
+        <span>Profile</span><svg class="tab-wave" viewBox="0 0 56 20" aria-hidden="true"><path d="M2,16 Q28,2 54,16" /></svg>
       </div>
     </ion-tab-button>
-
   </ion-tab-bar>
 </ion-tabs>

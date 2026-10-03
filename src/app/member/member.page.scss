@@ -70,3 +70,33 @@ ion-card-title {
     object-fit: cover;
     border-radius: 50%;
 }
+ion-content.counter-content {
+  --background: #101313;
+  --color: #f5f6f2;
+  --padding-top: 22px;
+  --padding-start: 20px;
+  --padding-end: 20px;
+  --padding-bottom: 28px;
+}
+.counter-page { max-width: 440px; margin: 0 auto; }
+.counter-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; }
+.counter-brand { font-size: 15px; font-weight: 800; letter-spacing: 0.4px; }
+.counter-top-actions { display: flex; align-items: center; gap: 12px; }
+.counter-tier { border: 1px solid #8aaf39; border-radius: 20px; padding: 4px 10px; color: #c8ef66; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+.counter-top-actions a { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid #303737; border-radius: 50%; color: #c8ef66; background: #1b2020; }
+.counter-page h1 { margin: 0 0 8px; font-size: 23px; line-height: 1.25; font-weight: 750; }
+.counter-description { margin: 0 0 20px; color: #969f9f; font-size: 13px; line-height: 1.55; }
+.counter-qr-card { width: min(100%, 320px); margin: 0 auto; padding: 15px 15px 17px; border-radius: 20px; background: #fff; }
+.counter-qr-card img { display: block; width: 100%; height: auto; border-radius: 0; }
+.counter-qr-card p { margin: 4px 0 0; text-align: center; color: #727b7b; font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+.counter-qr-card p span { margin-left: 8px; }
+.counter-scan-hint { display: flex; align-items: center; justify-content: center; gap: 7px; color: #8b9696; font-size: 11px; margin: 18px 0; }
+.counter-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); background: #1a1f1f; border: 1px solid #2b3232; border-radius: 16px; overflow: hidden; }
+.counter-stats div { padding: 16px 12px; }
+.counter-stats div + div { border-left: 1px solid #2b3232; }
+.counter-stats span { display: block; font-size: 9px; font-weight: 600; letter-spacing: 1px; color: #8e9d9d; margin-bottom: 8px; }
+.counter-stats strong { display: block; font-size: 19px; color: #eef3e8; }
+.counter-actions { display: grid; grid-template-columns: 1.15fr 1fr; gap: 10px; margin-top: 18px; }
+.counter-actions a { display: flex; justify-content: center; align-items: center; gap: 7px; min-height: 46px; padding: 8px; border: 1px solid #2b3232; border-radius: 12px; color: #f2f4ef; text-decoration: none; font-size: 12px; font-weight: 650; }
+.counter-actions a.counter-redeem { background: #caf36b; border-color: #caf36b; color: #203316; }
+.counter-actions ion-icon { font-size: 17px; }

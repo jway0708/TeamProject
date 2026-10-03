@@ -16,7 +16,8 @@
       <!-- Phone Number -->
       <ion-item lines="none">
         <ion-label position="stacked">Phone Number</ion-label>
-        <ion-input type="tel" [(ngModel)]="phoneNumber" name="phoneNumber" placeholder="e.g. +60 12-345 6789" required></ion-input>
+        <ion-input type="tel" [(ngModel)]="phoneNumber" name="phoneNumber" placeholder="e.g. +60 12-345 6789"
+          required></ion-input>
       </ion-item>
 
       <!-- Referral Code -->
@@ -35,7 +36,8 @@
       </ion-item>
 
       <!-- Submit Button -->
-      <ion-button expand="block" type="button" class="ion-margin-top" (click)="onSubmit()" [disabled]="!phoneNumber || !otpCode">
+      <ion-button expand="block" type="button" class="ion-margin-top" (click)="onSubmit()"
+        [disabled]="!phoneNumber || !otpCode">
         Register Now
       </ion-button>
 
