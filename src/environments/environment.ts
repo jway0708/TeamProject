@@ -3,6 +3,7 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
+  nativeApiBaseUrl: 'http://10.0.2.2:3000/api',
   production: false,
   pushEnabled: false,
   apiBaseUrl: '/api',

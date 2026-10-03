@@ -7,7 +7,7 @@
     "ng": "ng",
     "start": "ng serve",
     "dev": "node scripts/dev.mjs",
-    "android:sync": "npm run build && cap sync android",
+    "android:sync": "npm run build -- --configuration development && cap sync android",
     "android:open": "cap open android",
     "start:api": "node --env-file=server/.env server/index.mjs",
     "test:api": "node --test server/*.test.mjs",

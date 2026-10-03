@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastController, LoadingController } from '@ionic/angular';
 import { ApiService } from '../services/api';
@@ -21,7 +21,8 @@ export class RegisterPagePage implements OnDestroy {
     private apiService: ApiService,
     private router: Router,
     private toastCtrl: ToastController,
-    private loadingCtrl: LoadingController
+    private loadingCtrl: LoadingController,
+    private cdr?: ChangeDetectorRef
   ) { }
 
   // 1. 失去焦点时校验推荐码
@@ -68,6 +69,7 @@ export class RegisterPagePage implements OnDestroy {
     this.countdown = 60;
     this.timer = setInterval(() => {
       this.countdown--;
+      this.cdr?.markForCheck();
       if (this.countdown <= 0) {
         clearInterval(this.timer);
       }
@@ -112,6 +114,7 @@ export class RegisterPagePage implements OnDestroy {
   ngOnDestroy() { clearInterval(this.timer); }
 
   private async showToast(msg: string) {
+    this.cdr?.markForCheck();
     const toast = await this.toastCtrl.create({
       message: msg,
       duration: 2000,

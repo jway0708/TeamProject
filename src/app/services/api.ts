@@ -1,17 +1,57 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map, switchMap, throwError } from 'rxjs';
+import { Observable, of, from, map, switchMap, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, CapacitorHttp, HttpOptions } from '@capacitor/core';
 import { decodeResponse, loginConfirmed } from './api-response';
+
+export const nativeHttp = { request: (options: HttpOptions) => CapacitorHttp.request(options) };
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
-  private readonly baseUrl = (Capacitor.isNativePlatform() ? 'https://xcodeappapi.xcode.com.my/api' : environment.apiBaseUrl).trim().replace(/\/+$/, '');
+  private readonly baseUrl = (Capacitor.isNativePlatform() ? environment.nativeApiBaseUrl : environment.apiBaseUrl).trim().replace(/\/+$/, '');
 
+  readonly demoOtpEnabled = !environment.production;
+  private demoRequestedPhone = '';
+  private demoPhone = '';
+  private cleanPhone(value: string): string { return value.replace(/[\s()+-]/g, ''); }
+  clearDemo(): void { this.demoPhone = ''; this.demoRequestedPhone = ''; }
+  requestDemoOtp(phone: string): Observable<unknown> {
+    if (!this.demoOtpEnabled) return throwError(() => new Error('Test login is disabled.'));
+    if (!/^\d{8,15}$/.test(this.cleanPhone(phone))) return throwError(() => new Error('Enter a valid test phone number.'));
+    this.clearDemo();
+    this.demoRequestedPhone = phone.trim();
+    return of({ success: true });
+  }
+  private demoProfile() {
+    return { Name: 'Test Member', PhoneNumber: this.demoPhone, Tier: 'Test', Balance: 0, Point: 0, TotalStamp: 0, Email: '', ReferralCode: '' };
+  }
+  private nativeCookie = '';
   constructor(private http: HttpClient) { }
+
+  private async nativeRequest(method: 'GET' | 'POST', path: string, body?: unknown): Promise<unknown> {
+    if (!this.baseUrl) throw new Error('Configure the Android backend HTTPS address before using a release build.');
+    const response = await nativeHttp.request({
+      url: this.baseUrl + path, method,
+      headers: { 'Content-Type': 'application/json', ...(this.nativeCookie ? { Cookie: this.nativeCookie } : {}) },
+      ...(method === 'POST' ? { data: body } : {}),
+      responseType: 'text', connectTimeout: 15000, readTimeout: 20000,
+    });
+    const cookie = Object.entries(response.headers).find(([key]) => key.toLowerCase() === 'set-cookie')?.[1];
+    if (cookie) {
+      const match = String(cookie).match(/member_session=([^; ,]*)/);
+      if (match) this.nativeCookie = match[1] ? 'member_session=' + match[1] : '';
+    }
+    const raw = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+    if (response.status >= 400) {
+      let message = 'Backend request failed (' + response.status + ').';
+      try { message = JSON.parse(raw).message || message; } catch { /* Use status if no JSON message. */ }
+      throw Object.assign(new Error(message), { status: response.status });
+    }
+    return decodeResponse(raw);
+  }
 
   // 1. 校验推荐码
   checkReferralCode(code: string): Observable<any> {
@@ -29,6 +69,14 @@ export class ApiService {
 
   // 3. 提交注册/登录
   loginOrRegister(phone: string, otp: string, referralCode?: string, isRegister: boolean = false): Observable<any> {
+    if (!isRegister && this.demoOtpEnabled && this.demoRequestedPhone) {
+      if (this.cleanPhone(phone) !== this.cleanPhone(this.demoRequestedPhone) || this.cleanPhone(String(otp)) !== this.cleanPhone(phone)) {
+        return throwError(() => new Error('For test login, enter the same phone number in the OTP field.'));
+      }
+      this.demoPhone = phone.trim();
+      this.demoRequestedPhone = '';
+      return of(this.demoProfile());
+    }
     const endpoint = isRegister ? '/MemberLogin/RegisterMember' : '/MemberLogin/MemberMobileLoginGetProfile';
     // Send the field names defined by RegisterMemberParam and LoginData in Swagger.
     const body = isRegister
@@ -69,6 +117,7 @@ export class ApiService {
   }
 
   loginWithEmail(email: string, password: string): Observable<unknown> {
+    this.clearDemo();
     return this.post('/MemberLogin/CheckEmailPassword', { Email: email, Password: password }).pipe(map(response => {
       if (!loginConfirmed(response)) throw new Error('Email login was not confirmed by the API.');
       return response;
@@ -76,10 +125,17 @@ export class ApiService {
   }
 
   get(path: string): Observable<unknown> {
+    if (this.demoOtpEnabled && this.demoPhone) return of([]);
+    if (Capacitor.isNativePlatform()) return from(this.nativeRequest('GET', path));
     return this.http.get(`${this.baseUrl}${path}`, { responseType: 'text' }).pipe(map(decodeResponse));
   }
 
   post<T = unknown>(path: string, body: unknown): Observable<T> {
+    if (this.demoOtpEnabled && this.demoPhone) {
+      if (path === '/MemberDetails/GetMemberDetails' || path === '/MemberLogin/KeepLoginUser') return of(this.demoProfile() as T);
+      return throwError(() => new Error('Test login uses demo data. Sign in with email/password to access real member features.'));
+    }
+    if (Capacitor.isNativePlatform()) return from(this.nativeRequest('POST', path, body)) as Observable<T>;
     if (!this.baseUrl) {
       return throwError(() => new Error('API address is missing. Set apiBaseUrl in the environment file.'));
     }

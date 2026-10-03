@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastController, LoadingController } from '@ionic/angular';
 import { ApiService } from '../services/api';
@@ -15,6 +15,7 @@ import { firstValueFrom } from 'rxjs';
 })
 export class LoginPage implements OnDestroy {
   emailMode = false;
+  readonly demoOtpEnabled = this.apiService.demoOtpEnabled;
   email = '';
   password = '';
   phoneNumber: string = '';
@@ -30,6 +31,7 @@ export class LoginPage implements OnDestroy {
     private loadingCtrl: LoadingController,
     private session: MemberSession,
     private android: AndroidMember,
+    private cdr?: ChangeDetectorRef,
   ) {}
 
   // 2. 发送 OTP 验证码
@@ -43,11 +45,11 @@ export class LoginPage implements OnDestroy {
     const loading = await this.loadingCtrl.create({ message: 'Sending OTP...' });
     await loading.present();
 
-    this.apiService.requestOtp(phone, false).subscribe({
+    (this.demoOtpEnabled ? this.apiService.requestDemoOtp(phone) : this.apiService.requestOtp(phone, false)).subscribe({
       next: async (res) => {
         await loading.dismiss();
         this.otpRequestedFor = phone;
-        this.showToast('OTP sent successfully!');
+        this.showToast(this.demoOtpEnabled ? 'Test mode: enter your phone number as the OTP. No SMS is sent.' : 'OTP sent successfully!');
         this.startCountdown();
       },
       error: async (err) => {
@@ -62,6 +64,7 @@ export class LoginPage implements OnDestroy {
     this.countdown = 60;
     this.timer = setInterval(() => {
       this.countdown--;
+      this.cdr?.markForCheck();
       if (this.countdown <= 0) {
         clearInterval(this.timer);
       }
@@ -95,7 +98,7 @@ export class LoginPage implements OnDestroy {
           this.showToast(error instanceof Error ? error.message : 'Unable to load your profile.');
           return;
         }
-        void this.android.registerPush(phone);
+        if (!this.demoOtpEnabled) void this.android.registerPush(phone);
         
         this.showToast('Operation successful!');
         // 跳转至首页
@@ -122,11 +125,12 @@ export class LoginPage implements OnDestroy {
       void this.android.registerPush(phone);
       await this.router.navigateByUrl('/tabs/homepage');
     } catch (error) { this.showToast(error instanceof Error ? error.message : 'Unable to sign in.'); }
-    finally { await loading.dismiss(); }
+    finally { await loading.dismiss(); this.cdr?.markForCheck(); }
   }
   ngOnDestroy() { clearInterval(this.timer); }
 
   private async showToast(msg: string) {
+    this.cdr?.markForCheck();
     const toast = await this.toastCtrl.create({
       message: msg,
       duration: 2000,

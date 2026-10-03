@@ -127,6 +127,7 @@ export class MemberPage {
       }
       this.selected = records(result)[0] || null;
     } catch (error) { this.error = this.message(error); }
+    finally { this.cdr.markForCheck(); }
   }
   async rewardQr(item: ApiRecord): Promise<void> {
     try {
@@ -135,6 +136,7 @@ export class MemberPage {
       this.qrTitle = this.label(item);
       this.qrImage = await QRCode.toDataURL(value, { width: 360, margin: 4 });
     } catch (error) { this.error = this.message(error); }
+    finally { this.cdr.markForCheck(); }
   }
   async markRead(item?: ApiRecord): Promise<void> {
     await this.perform(() => this.post(item ? '/MemberNotification/UserReadNotification' : '/MemberNotification/UserReadAllNotification',
@@ -144,6 +146,7 @@ export class MemberPage {
   async share(): Promise<void> {
     try { await this.android.shareReferral(this.session.profile?.referralCode || ''); }
     catch (error) { this.error = this.message(error); }
+    finally { this.cdr.markForCheck(); }
   }
   async map(item: ApiRecord): Promise<void> {
     try {
@@ -154,19 +157,21 @@ export class MemberPage {
       const location = await this.android.location();
       window.open(`https://www.google.com/maps/dir/?api=1&origin=${location.latitude},${location.longitude}&destination=${lat},${lon}`, '_system');
     } catch (error) { this.error = this.message(error); }
+    finally { this.cdr.markForCheck(); }
   }
   async saveProfile(): Promise<void> {
     await this.perform(() => this.post('/MemberAccount/MemberEditProfile', {
       PhoneNumber: this.session.phone, UserName: this.name.trim(), Email: this.email.trim(),
       Birthday: this.birthday || null, ImageByte: this.photo || null,
     }), 'Profile saved.');
+    if (!this.error) await this.load();
   }
   async choosePhoto(event: Event): Promise<void> {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/') || file.size > 2_000_000) { this.error = 'Choose an image smaller than 2 MB.'; return; }
     const reader = new FileReader();
-    reader.onload = () => { this.photo = String(reader.result).split(',')[1] || ''; this.photoMime = file.type; };
+    reader.onload = () => { this.photo = String(reader.result).split(',')[1] || ''; this.photoMime = file.type; this.cdr.markForCheck(); };
     reader.readAsDataURL(file);
   }
   async emailOtp(): Promise<void> {
@@ -206,6 +211,6 @@ export class MemberPage {
     this.loading = true; this.error = ''; this.notice = '';
     try { await action(); this.notice = notice; }
     catch (error) { this.error = this.message(error); }
-    finally { this.loading = false; }
+    finally { this.loading = false; this.cdr.markForCheck(); }
   }
 }

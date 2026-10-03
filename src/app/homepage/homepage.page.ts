@@ -69,6 +69,7 @@ export class HomepagePage implements OnDestroy {
         this.cdr?.markForCheck();
       },
       error: error => {
+        this.cdr?.markForCheck();
         this.loading = false;
         if (error.status === 401) {
           localStorage.removeItem('user_phone');

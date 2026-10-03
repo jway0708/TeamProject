@@ -17,6 +17,7 @@ export class MemberSession {
     localStorage.setItem('user_phone', phone);
   }
   clear(): void {
+    this.api.clearDemo();
     this.profile = null;
     localStorage.removeItem('user_phone');
   }

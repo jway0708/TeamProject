@@ -32,7 +32,7 @@
       <!-- OTP Code + Get OTP Button -->
       <ion-item lines="none">
         <ion-label position="floating">OTP Code</ion-label>
-        <ion-input type="number" [(ngModel)]="otpCode" name="otpCode" required></ion-input>
+        <ion-input type="text" inputmode="tel" [(ngModel)]="otpCode" name="otpCode" required></ion-input>
         <ion-button type="button" slot="end" fill="clear" (click)="onSendOtp()" [disabled]="countdown > 0">
           {{ countdown > 0 ? countdown + 's' : 'Get OTP' }}
         </ion-button>

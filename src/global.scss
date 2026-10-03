@@ -35,3 +35,9 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 // @import "@ionic/angular/css/palettes/dark.system.css";
+
+/* Space beneath tab pages lets the final content scroll above the floating bar. */
+app-tabs ion-content::part(scroll) {
+  padding-bottom: calc(124px + max(env(safe-area-inset-bottom, 0px), var(--ion-safe-area-bottom, 0px)));
+  scroll-padding-bottom: calc(124px + max(env(safe-area-inset-bottom, 0px), var(--ion-safe-area-bottom, 0px)));
+}

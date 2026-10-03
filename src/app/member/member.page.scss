@@ -73,7 +73,7 @@ ion-card-title {
 ion-content.counter-content {
   --background: #101313;
   --color: #f5f6f2;
-  --padding-top: 22px;
+  --padding-top: calc(22px + env(safe-area-inset-top, 0px));
   --padding-start: 20px;
   --padding-end: 20px;
   --padding-bottom: 28px;
