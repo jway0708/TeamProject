@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
@@ -51,7 +51,7 @@ export class MemberPage {
   feedbackLocation = '';
   readonly historyOptions = Object.keys(histories);
   constructor(private route: ActivatedRoute, private api: ApiService, public session: MemberSession,
-    public android: AndroidMember, private alerts: AlertController) { }
+    public android: AndroidMember, private alerts: AlertController, private cdr: ChangeDetectorRef) { }
 
   ionViewWillEnter() {
     this.area = this.route.snapshot.data['area'];
@@ -112,7 +112,7 @@ export class MemberPage {
       }
       this.items = records(result);
     } catch (error) { this.error = this.message(error); }
-    finally { this.loading = false; }
+    finally { this.loading = false; this.cdr.markForCheck(); }
   }
   async detail(item: ApiRecord): Promise<void> {
     this.error = ''; this.qrImage = '';

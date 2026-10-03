@@ -9,16 +9,10 @@
     <h2>Welcome Back</h2>
     <p class="subtitle">Please enter your details to sign in</p>
 
-    <!-- Segment 切换登录/注册模式 -->
-    <ion-segment [(ngModel)]="isRegister" (ionChange)="resetForm()">
-      <ion-segment-button [value]="false">
-        <ion-label>Login</ion-label>
-      </ion-segment-button>
-      <ion-segment-button [value]="true">
-        <ion-label>Register</ion-label>
-      </ion-segment-button>
-    </ion-segment>
-
+    <div class="ion-margin-bottom">
+      <ion-button type="button">Login</ion-button>
+      <ion-button type="button" fill="outline" routerLink="/register-page">Register</ion-button>
+    </div>
     <ion-button fill="clear" (click)="emailMode = !emailMode">{{ emailMode ? 'Use phone OTP' : 'Use email and password' }}</ion-button>
     <form *ngIf="emailMode" (ngSubmit)="emailLogin()">
       <ion-item><ion-input label="Email" type="email" [(ngModel)]="email" name="email" required></ion-input></ion-item>
@@ -32,12 +26,6 @@
         <ion-input type="tel" [(ngModel)]="phoneNumber" name="phoneNumber" placeholder="e.g. +60 12-345 6789" required></ion-input>
       </ion-item>
 
-      <!-- Referral Code (仅注册模式显示) -->
-      <ion-item lines="none" *ngIf="isRegister">
-        <ion-label position="floating">Referral Code (Optional)</ion-label>
-        <ion-input type="text" [(ngModel)]="referralCode" name="referralCode" (ionBlur)="onCheckReferral()"></ion-input>
-      </ion-item>
-
       <!-- OTP Code + Get OTP Button -->
       <ion-item lines="none">
         <ion-label position="floating">OTP Code</ion-label>
@@ -49,7 +37,7 @@
 
       <!-- Submit Button -->
       <ion-button expand="block" type="button" class="ion-margin-top" (click)="onSubmit()" [disabled]="!phoneNumber || !otpCode">
-        {{ isRegister ? 'Register' : 'Login' }}
+        Login
       </ion-button>
     </form>
     <ion-button fill="clear" routerLink="/forgot-password">Forgot password?</ion-button>

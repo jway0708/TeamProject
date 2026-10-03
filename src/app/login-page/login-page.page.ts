@@ -19,8 +19,6 @@ export class LoginPage implements OnDestroy {
   password = '';
   phoneNumber: string = '';
   otpCode: string = '';
-  referralCode: string = '';
-  isRegister: boolean = false;
   countdown: number = 0;
   private otpRequestedFor: string | null = null;
   private timer: any;
@@ -34,27 +32,6 @@ export class LoginPage implements OnDestroy {
     private android: AndroidMember,
   ) {}
 
-  resetForm() {
-    clearInterval(this.timer);
-    this.countdown = 0;
-    this.otpCode = '';
-    this.referralCode = '';
-    this.otpRequestedFor = null;
-  }
-
-  // 1. 失去焦点时校验推荐码
-  onCheckReferral() {
-    if (!this.referralCode.trim()) return;
-    this.apiService.checkReferralCode(this.referralCode).subscribe({
-      next: (res) => {
-        if (!res.isValid) {
-          this.showToast('Invalid referral code, please try again.');
-        }
-      },
-      error: () => this.showToast('Error validating referral code.')
-    });
-  }
-
   // 2. 发送 OTP 验证码
   async onSendOtp() {
     const phone = this.phoneNumber.trim();
@@ -66,7 +43,7 @@ export class LoginPage implements OnDestroy {
     const loading = await this.loadingCtrl.create({ message: 'Sending OTP...' });
     await loading.present();
 
-    this.apiService.requestOtp(phone, this.isRegister).subscribe({
+    this.apiService.requestOtp(phone, false).subscribe({
       next: async (res) => {
         await loading.dismiss();
         this.otpRequestedFor = phone;
@@ -91,7 +68,7 @@ export class LoginPage implements OnDestroy {
     }, 1000);
   }
 
-  // 3. 提交登录或注册
+  // 3. 提交登录
   async onSubmit() {
     const phone = this.phoneNumber.trim();
 
@@ -106,17 +83,11 @@ export class LoginPage implements OnDestroy {
     this.apiService.loginOrRegister(
       phone,
       this.otpCode,
-      this.referralCode,
-      this.isRegister
+      undefined,
+      false
     ).subscribe({
       next: async (res) => {
         await loading.dismiss();
-        if (this.isRegister) {
-          this.isRegister = false;
-          this.resetForm();
-          this.showToast('Registration submitted. Please sign in with a new OTP to load your profile.');
-          return;
-        }
         // 保存当前用户手机号到本地存储
         try {
           await this.session.establish(phone);

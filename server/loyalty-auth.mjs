@@ -55,11 +55,11 @@ export function createAuthorization(config, fetchImpl = fetch) {
     try { return await pending; } finally { pending = undefined; }
   }
 
-  async function post(path, body) {
+  async function request(path, body, method = 'POST') {
     const send = async (token) => fetchImpl(`${baseUrl}${path}`, {
-      method: 'POST',
+      method,
       headers: { 'Content-Type': 'application/json', Accept: 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify(body), signal: AbortSignal.timeout(15_000), redirect: 'error',
+      body: method === 'GET' ? undefined : JSON.stringify(body), signal: AbortSignal.timeout(15_000), redirect: 'error',
     });
     const usedToken = await getToken();
     let response = await send(usedToken);
@@ -70,5 +70,5 @@ export function createAuthorization(config, fetchImpl = fetch) {
     }
     return response;
   }
-  return { post };
+  return { post: (path, body) => request(path, body), get: path => request(path, undefined, 'GET') };
 }

@@ -65,3 +65,26 @@ test('API profile for a different account is rejected', async t => {
   const response = await post(login, { PhoneNumber: phone, OtpCode: 'test-otp' });
   assert.equal((await post(details, {}, response.headers.get('set-cookie'))).status, 502);
 });
+
+test('email login attaches backend authorization, creates a session and hides secrets', async t => {
+  const post = await setup(t, async (url, options) => {
+    assert.equal(options.headers.Authorization, 'Bearer test-token-aaaaaaaaaaaaaaaaaaaa');
+    if (url.endsWith('/CheckEmailPassword')) {
+      assert.deepEqual(JSON.parse(options.body), { Email: 'member@example.test', Password: 'test-password' });
+      return json({ Email: 'member@example.test', PhoneNumber: phone, Name: 'Member', Password: 'test-password' });
+    }
+    return json({ PhoneNumber: phone, Name: 'Member' });
+  });
+  const response = await post('MemberLogin/CheckEmailPassword', { Email: 'member@example.test', Password: 'test-password' });
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).Password, undefined);
+  assert.match(response.headers.get('set-cookie'), /HttpOnly/);
+  assert.equal((await post(details, {}, response.headers.get('set-cookie'))).status, 200);
+});
+
+test('unconfirmed email login cannot create a member session', async t => {
+  const post = await setup(t, async () => json({ success: true }));
+  const response = await post('MemberLogin/CheckEmailPassword', { Email: 'member@example.test', Password: 'test-password' });
+  assert.equal(response.status, 502);
+  assert.equal((await post(details, {}, response.headers.get('set-cookie'))).status, 401);
+});

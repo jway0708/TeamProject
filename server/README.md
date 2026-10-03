@@ -1,9 +1,10 @@
-# OTP API 授权后端
+# 本地 API 授权后端
 
-当前项目已恢复直连 Loyalty API：开发代理指向 `https://xcodeappapi.xcode.com.my`，
-生产环境也直接使用该 API。运行 `ionic serve` 或 `npm start` 即可，当前无需启动本后端。
-以下后端配置说明仅用于以后重新启用本后端，前端当前不会调用它。
-直连仍可能返回远端 401；修改代理不会取消服务端授权要求。
+浏览器开发代理现在将 `/api` 转发到 `http://127.0.0.1:3000`。
+Token 放在 `server/.env` 的 `LOYALTY_API_TOKEN`，不要加 Bearer 前缀。
+修改代理后必须重启 `npm start` 或 `ionic serve`，并同时运行 `npm run start:api`。
+Email 登录 `CheckEmailPassword` 已支持，会建立 HttpOnly 会员会话。
+Android 原生 App 仍使用外部 API；本次只接通浏览器本地开发。
 
 需要 Node.js 22 或更新版本。使用 Node 内置模块，不需要新增 npm 依赖。
 

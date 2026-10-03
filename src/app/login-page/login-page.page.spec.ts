@@ -15,10 +15,4 @@ describe('LoginPage', () => {
     await page.onSubmit();
     expect(submitted).toBe(false);
   });
-  it('clears the OTP and resend timer when switching registration mode', () => {
-    const page = new LoginPage({} as ApiService, {} as Router, {} as ToastController,
-      {} as LoadingController, {} as MemberSession, {} as AndroidMember);
-    page.otpCode = '987654'; page.startCountdown(); page.resetForm();
-    expect(page.otpCode).toBe(''); expect(page.countdown).toBe(0); page.ngOnDestroy();
-  });
 });

@@ -4,7 +4,12 @@ import { pathToFileURL } from 'node:url';
 import { createAuthorization } from './loyalty-auth.mjs';
 
 // Only account bootstrap routes and the session-protected member profile are exposed.
+const contentRoutes = new Set(['/api/ManageHighlight/UserGetAllHighlight', '/api/MemberReward/GetRewards']);
+const memberReadRoutes = new Set(['/api/MemberDetails/GetMemberDetails', '/api/History/GetAllRecordByPhoneNumber']);
 const routes = new Set([
+  ...memberReadRoutes,
+  ...contentRoutes,
+  '/api/MemberLogin/CheckEmailPassword',
   '/api/MemberAccount/RequestOTP',
   '/api/MemberAccount/RegisterOtp',
   '/api/MemberLogin/MemberMobileLoginGetProfile',
@@ -13,7 +18,9 @@ const routes = new Set([
   '/api/MemberDetails/GetMemberDetails',
 ]);
 
+const emailLoginRoute = '/api/MemberLogin/CheckEmailPassword';
 const loginRoutes = new Set([
+  emailLoginRoute,
   '/api/MemberLogin/MemberMobileLoginGetProfile',
 ]);
 const canonicalPhone = value => typeof value === 'string' ? value.replace(/[\s()+-]/g, '') : '';
@@ -24,7 +31,7 @@ function confirmsLogin(value, phone) {
   const data = lowerKeys(value);
   if (data.success === false || data.issuccess === false || data.error || data.errors) return false;
   if (data.success === true || data.issuccess === true) return true;
-  if (data.phonenumber && canonicalPhone(data.phonenumber) === canonicalPhone(phone)) return true;
+  if ((data.phonenumber || data.phone) && canonicalPhone(data.phonenumber || data.phone) === canonicalPhone(phone)) return true;
   return data.data ? confirmsLogin(data.data, phone) : false;
 }
 
@@ -40,6 +47,15 @@ export function createGateway(config, fetchImpl = fetch) {
     };
     const url = new URL(req.url, 'http://localhost');
     if (!routes.has(url.pathname) || url.search) return reply(404, { message: 'API route is not available.' });
+    if (contentRoutes.has(url.pathname)) {
+      if (req.method !== 'GET') { res.setHeader('Allow', 'GET'); return reply(405, { message: 'Use GET.' }); }
+      try {
+        const upstream = await auth.get(url.pathname.slice(4));
+        const value = await upstream.json();
+        return reply(upstream.status, JSON.parse(JSON.stringify(value, (key, entry) =>
+          /^(otp|otpcode|token|access_token|accesstoken|jwttoken|password)$/i.test(key) ? undefined : entry)));
+      } catch { return reply(502, { message: 'Unable to load Loyalty API content.' }); }
+    }
     if (req.method !== 'POST') {
       res.setHeader('Allow', 'POST');
       return reply(405, { message: 'Use POST.' });
@@ -65,7 +81,7 @@ export function createGateway(config, fetchImpl = fetch) {
       if (sessionId) sessions.delete(sessionId);
       res.setHeader('Set-Cookie', sessionCookie('', 0));
     }
-    if (url.pathname === '/api/MemberDetails/GetMemberDetails') {
+    if (memberReadRoutes.has(url.pathname)) {
       const session = sessions.get(sessionId);
       if (!session || session.expiresAt <= Date.now()) {
         sessions.delete(sessionId);
@@ -79,11 +95,16 @@ export function createGateway(config, fetchImpl = fetch) {
     try {
       // The existing frontend uses PhoneNumber/OtpCode; Swagger LoginData uses Phone/OTP.
       let upstreamBody = body;
-      if (loginRoutes.has(url.pathname)) {
-        if (!canonicalPhone(body.PhoneNumber) || !body.OtpCode) {
+      if (url.pathname === emailLoginRoute) {
+        if (typeof body.Email !== 'string' || !body.Email.trim() || typeof body.Password !== 'string' || !body.Password) {
+          return reply(400, { message: 'Email and password are required.' });
+        }
+        upstreamBody = { Email: body.Email.trim(), Password: body.Password };
+      } else if (loginRoutes.has(url.pathname)) {
+        if (!canonicalPhone(body.PhoneNumber || body.Phone) || !(body.OtpCode || body.OTP)) {
           return reply(400, { message: 'Phone number and OTP are required.' });
         }
-        upstreamBody = { Phone: body.PhoneNumber, OTP: String(body.OtpCode), FirstLogin: false, DeviceId: body.DeviceId || '' };
+        upstreamBody = { Phone: body.PhoneNumber || body.Phone, OTP: String(body.OtpCode || body.OTP), FirstLogin: body.FirstLogin === true, DeviceId: body.DeviceId || '' };
       }
       if (url.pathname === '/api/MemberLogin/RegisterMember') {
         // RegisterMember has no OTP field in Swagger. Do not treat registration
@@ -99,13 +120,16 @@ export function createGateway(config, fetchImpl = fetch) {
       try { value = raw ? JSON.parse(raw) : {}; }
       catch { return reply(502, { message: 'Loyalty API returned an unexpected response.' }); }
       if (loginRoutes.has(url.pathname) && upstream.ok) {
-        if (!canonicalPhone(body.PhoneNumber) || !body.OtpCode || !confirmsLogin(value, body.PhoneNumber)) {
+        const envelope = lowerKeys(value);
+        const profile = lowerKeys(envelope.data || value);
+        const sessionPhone = url.pathname === emailLoginRoute ? profile.phonenumber || profile.phone : upstreamBody.Phone;
+        if (!canonicalPhone(sessionPhone) || !confirmsLogin(value, sessionPhone)) {
           return reply(502, { message: 'Login was not confirmed by Loyalty API. Check the login response format with the API owner.' });
         }
         const now = Date.now();
         for (const [id, session] of sessions) if (session.expiresAt <= now) sessions.delete(id);
         const id = randomBytes(32).toString('hex');
-        sessions.set(id, { phone: body.PhoneNumber.trim(), expiresAt: now + 3_600_000 });
+        sessions.set(id, { phone: sessionPhone.trim(), expiresAt: now + 3_600_000 });
         res.setHeader('Set-Cookie', sessionCookie(id, 3600));
       }
       if (url.pathname === '/api/MemberDetails/GetMemberDetails' && upstream.ok) {

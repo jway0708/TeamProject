@@ -1,4 +1,5 @@
-import { Component, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
+import { MemberSession } from '../services/member-session';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ApiService } from '../services/api';
@@ -27,7 +28,7 @@ export class HomepagePage implements OnDestroy {
     { label: 'Refer', icon: 'person-add-outline', url: '/tabs/refer' },
   ];
 
-  constructor(private router: Router, private api: ApiService) {}
+  constructor(private router: Router, private api: ApiService, private cdr?: ChangeDetectorRef, private session?: MemberSession) {}
 
   ionViewWillEnter() { this.loadMember(); void this.loadContent(); }
   read(value: unknown, ...keys: string[]): string { return String(field(value, ...keys) ?? ''); }
@@ -47,11 +48,12 @@ export class HomepagePage implements OnDestroy {
       if (results[1].status === 'fulfilled') this.rewards = records(results[1].value).slice(0, 4);
       else this.contentError += ' Rewards could not be loaded.';
     } catch (error) { this.contentError = error instanceof Error ? error.message : 'Unable to load content.'; }
+    this.cdr?.markForCheck();
   }
 
   loadMember() {
     this.profileRequest?.unsubscribe();
-    this.member = null;
+    this.member = this.session?.profile ?? null;
     this.profileError = '';
     const phone = localStorage.getItem('user_phone')?.trim();
     if (!phone) {
@@ -64,6 +66,7 @@ export class HomepagePage implements OnDestroy {
         try { this.member = parseMemberProfile(response, phone); }
         catch (error) { this.profileError = error instanceof Error ? error.message : 'Unable to load member profile.'; }
         this.loading = false;
+        this.cdr?.markForCheck();
       },
       error: error => {
         this.loading = false;
