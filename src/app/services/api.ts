@@ -15,18 +15,14 @@ export class ApiService {
 
   readonly demoOtpEnabled = !environment.production;
   private demoRequestedPhone = '';
-  private demoPhone = '';
   private cleanPhone(value: string): string { return value.replace(/[\s()+-]/g, ''); }
-  clearDemo(): void { this.demoPhone = ''; this.demoRequestedPhone = ''; }
+  clearDemo(): void { this.demoRequestedPhone = ''; }
   requestDemoOtp(phone: string): Observable<unknown> {
-    if (!this.demoOtpEnabled) return throwError(() => new Error('Test login is disabled.'));
-    if (!/^\d{8,15}$/.test(this.cleanPhone(phone))) return throwError(() => new Error('Enter a valid test phone number.'));
+    if (!this.demoOtpEnabled) return throwError(() => new Error('Phone-number OTP login is disabled in this build.'));
+    if (!/^\d{8,15}$/.test(this.cleanPhone(phone))) return throwError(() => new Error('Enter a valid phone number.'));
     this.clearDemo();
     this.demoRequestedPhone = phone.trim();
     return of({ success: true });
-  }
-  private demoProfile() {
-    return { Name: 'Test Member', PhoneNumber: this.demoPhone, Tier: 'Test', Balance: 0, Point: 0, TotalStamp: 0, Email: '', ReferralCode: '' };
   }
   private nativeCookie = '';
   constructor(private http: HttpClient) { }
@@ -69,13 +65,11 @@ export class ApiService {
 
   // 3. 提交注册/登录
   loginOrRegister(phone: string, otp: string, referralCode?: string, isRegister: boolean = false): Observable<any> {
-    if (!isRegister && this.demoOtpEnabled && this.demoRequestedPhone) {
+    if (this.demoOtpEnabled && this.demoRequestedPhone) {
       if (this.cleanPhone(phone) !== this.cleanPhone(this.demoRequestedPhone) || this.cleanPhone(String(otp)) !== this.cleanPhone(phone)) {
-        return throwError(() => new Error('For test login, enter the same phone number in the OTP field.'));
+        return throwError(() => new Error('Enter the same phone number in the OTP field.'));
       }
-      this.demoPhone = phone.trim();
-      this.demoRequestedPhone = '';
-      return of(this.demoProfile());
+      return this.post(isRegister ? '/MemberLogin/PhoneNumberRegister' : '/MemberLogin/PhoneNumberLogin', { PhoneNumber: phone.trim(), OTP: String(otp), ...(isRegister ? { ReferralBy: referralCode?.trim() || '' } : {}) });
     }
     const endpoint = isRegister ? '/MemberLogin/RegisterMember' : '/MemberLogin/MemberMobileLoginGetProfile';
     // Send the field names defined by RegisterMemberParam and LoginData in Swagger.
@@ -125,16 +119,11 @@ export class ApiService {
   }
 
   get(path: string): Observable<unknown> {
-    if (this.demoOtpEnabled && this.demoPhone) return of([]);
     if (Capacitor.isNativePlatform()) return from(this.nativeRequest('GET', path));
     return this.http.get(`${this.baseUrl}${path}`, { responseType: 'text' }).pipe(map(decodeResponse));
   }
 
   post<T = unknown>(path: string, body: unknown): Observable<T> {
-    if (this.demoOtpEnabled && this.demoPhone) {
-      if (path === '/MemberDetails/GetMemberDetails' || path === '/MemberLogin/KeepLoginUser') return of(this.demoProfile() as T);
-      return throwError(() => new Error('Test login uses demo data. Sign in with email/password to access real member features.'));
-    }
     if (Capacitor.isNativePlatform()) return from(this.nativeRequest('POST', path, body)) as Observable<T>;
     if (!this.baseUrl) {
       return throwError(() => new Error('API address is missing. Set apiBaseUrl in the environment file.'));

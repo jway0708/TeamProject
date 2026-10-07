@@ -1,52 +1,14 @@
-<ion-header class="ion-no-border">
-  <ion-toolbar color="light">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/login-page"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Register</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content class="ion-padding">
-  <div class="auth-container">
-    <h2>Create Account</h2>
-    <p class="subtitle">Please enter your details to sign up</p>
-
-    <form (ngSubmit)="onSubmit()" class="ion-margin-top">
-      <!-- Phone Number -->
-      <ion-item lines="none">
-        <ion-label position="stacked">Phone Number</ion-label>
-        <ion-input type="tel" [(ngModel)]="phoneNumber" name="phoneNumber" placeholder="e.g. +60 12-345 6789"
-          required></ion-input>
-      </ion-item>
-
-      <!-- Referral Code -->
-      <ion-item lines="none">
-        <ion-label position="floating">Referral Code (Optional)</ion-label>
-        <ion-input type="text" [(ngModel)]="referralCode" name="referralCode" (ionBlur)="onCheckReferral()"></ion-input>
-      </ion-item>
-
-      <!-- OTP Code -->
-      <ion-item lines="none">
-        <ion-label position="floating">OTP Code</ion-label>
-        <ion-input type="number" [(ngModel)]="otpCode" name="otpCode" required></ion-input>
-        <ion-button type="button" slot="end" fill="clear" (click)="onSendOtp()" [disabled]="countdown > 0">
-          {{ countdown > 0 ? countdown + 's' : 'Get OTP' }}
-        </ion-button>
-      </ion-item>
-
-      <!-- Submit Button -->
-      <ion-button expand="block" type="button" class="ion-margin-top" (click)="onSubmit()"
-        [disabled]="!phoneNumber || !otpCode">
-        Register Now
-      </ion-button>
-
-      <!-- Back to Login -->
-      <div class="ion-text-center ion-margin-top">
-        <ion-button fill="clear" size="small" (click)="goToLogin()">
-          Already have an account? Sign In
-        </ion-button>
-      </div>
-    </form>
-  </div>
-</ion-content>
+<ion-header class="ion-no-border"><ion-toolbar class="member-page-toolbar"><ion-buttons slot="start"><ion-back-button class="member-back-button" text="" aria-label="Go back" defaultHref="/login-page"></ion-back-button></ion-buttons></ion-toolbar></ion-header>
+<ion-content><main class="register-shell">
+  <span class="brand-mark" aria-hidden="true">M</span><span class="eyebrow">BECOME A MEMBER</span>
+  <h1>Your perks start here.</h1><p class="intro">Join us for rewards, little treats and more.</p>
+  <form (ngSubmit)="onSubmit()">
+    <section class="form-card"><h2>Create your account</h2>
+      <ion-input class="field" label="Phone number" labelPlacement="stacked" type="tel" autocomplete="tel" [(ngModel)]="phoneNumber" name="phoneNumber" placeholder="+60123456789" required></ion-input>
+      <ion-input class="field" label="Referral code (optional)" labelPlacement="stacked" type="text" [(ngModel)]="referralCode" name="referralCode" (ionBlur)="onCheckReferral()" placeholder="Have a friend's code?"></ion-input>
+      <div class="otp-row"><ion-input class="field" label="OTP code" labelPlacement="stacked" type="text" inputmode="tel" autocomplete="one-time-code" [(ngModel)]="otpCode" name="otpCode" placeholder="Enter OTP" required></ion-input><ion-button class="otp-button" type="button" fill="outline" (click)="onSendOtp()" [disabled]="countdown > 0">{{ countdown > 0 ? countdown + 's' : 'Get OTP' }}</ion-button></div>
+      <ion-button class="register-button" expand="block" type="submit" [disabled]="!phoneNumber || !otpCode">Create account</ion-button>
+    </section>
+  </form>
+  <p class="sign-in">Already a member? <a routerLink="/login-page">Sign in ↗</a></p>
+</main></ion-content>

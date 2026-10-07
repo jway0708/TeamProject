@@ -1,7 +1,6 @@
-<ion-header *ngIf="area !== 'qr'"><ion-toolbar><ion-buttons slot="start"><ion-back-button
-        defaultHref="/tabs/homepage"></ion-back-button></ion-buttons><ion-title>{{ title
+<ion-header *ngIf="area !== 'qr'"><ion-toolbar class="member-page-toolbar"><ion-buttons slot="start"><ion-back-button class="member-back-button" text="" aria-label="Go back" defaultHref="/tabs/homepage"></ion-back-button></ion-buttons><ion-title>{{ title
       }}</ion-title></ion-toolbar></ion-header>
-<ion-content class="ion-padding" [class.counter-content]="area === 'qr'">
+<ion-content class="ion-padding" [class.refined-content]="area === 'profile' || area === 'rewards' || area === 'highlight'" [class.counter-content]="area === 'qr'">
   <section *ngIf="area === 'qr'" class="counter-page">
     <div class="counter-top"><span class="counter-brand">MEMBER</span><div class="counter-top-actions"><span class="counter-tier">{{ session.profile?.tier || 'Member' }}</span><a routerLink="/tabs/notifications" aria-label="Notifications"><ion-icon name="notifications-outline"></ion-icon></a></div></div>
     <h1>Show this at the counter</h1>
@@ -15,6 +14,11 @@
     </div>
     <div class="counter-actions"><a class="counter-redeem" routerLink="/tabs/rewards"><ion-icon name="gift-outline"></ion-icon>Redeem a reward</a><a routerLink="/tabs/history"><ion-icon name="time-outline"></ion-icon>History</a></div>
   </section>
+  <header class="page-intro" *ngIf="area === 'rewards' || area === 'highlight'">
+    <span class="eyebrow">MEMBER BENEFITS</span>
+    <h1>{{ area === 'rewards' ? 'A little something for you' : 'Discover what’s new' }}</h1>
+    <p>{{ area === 'rewards' ? 'Explore rewards and find your next treat.' : 'Offers, news and more from your favourite stores.' }}</p>
+  </header>
   <ion-progress-bar *ngIf="loading" type="indeterminate"></ion-progress-bar>
   <div *ngIf="error" role="alert" class="message error">{{ error }} <ion-button fill="clear"
       (click)="load()">Retry</ion-button></div>
@@ -44,21 +48,28 @@
     <ion-button fill="clear" (click)="android.registerPush(session.phone)">Enable push alerts</ion-button>
     <p *ngIf="android.pushError">{{ android.pushError }}</p>
   </div>
-  <form *ngIf="area === 'profile'" (ngSubmit)="saveProfile()">
-    <ion-item><ion-input label="Phone" [value]="session.phone" readonly></ion-input></ion-item>
-    <ion-item><ion-input label="Name" [(ngModel)]="name" name="name" required></ion-input></ion-item>
-    <ion-item><ion-input label="Email" type="email" [(ngModel)]="email" name="email"></ion-input></ion-item>
-    <ion-item><ion-input label="Birthday" type="date" [(ngModel)]="birthday" name="birthday"></ion-input></ion-item>
-    <label class="photo">Profile photo <input type="file" accept="image/*" (change)="choosePhoto($event)"></label>
-    <img *ngIf="photo" class="photo-preview" [src]="'data:' + photoMime + ';base64,' + photo"
-      alt="Selected profile photo">
-    <ion-button type="submit" expand="block" [disabled]="loading || !name.trim()">Save profile</ion-button>
-    <ion-button fill="clear" (click)="emailOtp()">Request email verification</ion-button>
-    <p>Contact support to complete email verification.</p>
-    <ion-list><ion-item routerLink="/tabs/wallet" detail>Wallet</ion-item><ion-item routerLink="/tabs/feedback"
-        detail>Feedback</ion-item><ion-item routerLink="/tabs/notifications" detail>Notifications</ion-item></ion-list>
-    <ion-button fill="outline" expand="block" (click)="session.logout()">Log out</ion-button>
-    <ion-button fill="clear" color="danger" (click)="deactivate()">Deactivate account</ion-button>
+  <form *ngIf="area === 'profile'" class="profile-form" (ngSubmit)="saveProfile()">
+    <section class="profile-identity">
+      <div class="avatar"><img *ngIf="photo" [src]="'data:' + photoMime + ';base64,' + photo" alt="Profile photo"><span *ngIf="!photo">{{ (name || 'M').slice(0, 1).toUpperCase() }}</span></div>
+      <h1>{{ name || 'My account' }}</h1><p>{{ session.phone }}</p>
+      <label class="photo">Change photo<input type="file" accept="image/*" (change)="choosePhoto($event)"></label>
+    </section>
+    <section class="profile-fields">
+      <h2>Personal details</h2>
+      <ion-item lines="none"><ion-input label="Phone number" labelPlacement="stacked" [value]="session.phone" readonly></ion-input></ion-item>
+      <ion-item lines="none"><ion-input label="Name" labelPlacement="stacked" [(ngModel)]="name" name="name" required></ion-input></ion-item>
+      <ion-item lines="none"><ion-input label="Email address" labelPlacement="stacked" type="email" [(ngModel)]="email" name="email"></ion-input></ion-item>
+      <ion-item lines="none"><ion-input label="Birthday" labelPlacement="stacked" type="date" [(ngModel)]="birthday" name="birthday"></ion-input></ion-item>
+      <ion-button type="submit" expand="block" [disabled]="loading || !name.trim()">Save changes</ion-button>
+      <div class="email-verification"><ion-button fill="clear" (click)="emailOtp()">Verify email address</ion-button><p>Contact support to complete verification.</p></div>
+    </section>
+    <ion-list class="account-links" lines="full">
+      <ion-item routerLink="/tabs/wallet" detail><ion-icon name="wallet-outline" slot="start"></ion-icon><ion-label>Wallet</ion-label></ion-item>
+      <ion-item routerLink="/tabs/feedback" detail><ion-icon name="chatbubble-outline" slot="start"></ion-icon><ion-label>Feedback</ion-label></ion-item>
+      <ion-item routerLink="/tabs/notifications" detail><ion-icon name="notifications-outline" slot="start"></ion-icon><ion-label>Notifications</ion-label></ion-item>
+    </ion-list>
+    <ion-button class="logout-button" fill="outline" expand="block" (click)="session.logout()">Log out</ion-button>
+    <ion-button class="deactivate-button" fill="clear" color="danger" expand="block" (click)="deactivate()">Deactivate account</ion-button>
   </form>
   <form *ngIf="area === 'feedback'" (ngSubmit)="sendFeedback()">
     <ion-item><ion-input label="Title" [(ngModel)]="feedbackTitle" name="title" required></ion-input></ion-item>
@@ -88,21 +99,22 @@
       <ion-button *ngIf="area === 'notifications'" (click)="markRead(selected)">Mark read</ion-button><ion-button
         fill="clear" (click)="selected = null">Close</ion-button>
     </ion-card-content></ion-card>
-  <ion-card *ngFor="let item of items">
+  <ion-card *ngFor="let item of items" class="record-card" [class.benefit-card]="area === 'rewards' || area === 'highlight'">
+    <div class="card-category" *ngIf="area === 'rewards' || area === 'highlight'"><ion-icon [name]="area === 'rewards' ? 'gift-outline' : 'sparkles-outline'"></ion-icon><span>{{ area === 'rewards' ? 'MEMBER REWARD' : 'PROMOTION' }}</span></div>
     <ion-card-header><ion-card-title>{{ label(item) }}</ion-card-title></ion-card-header><ion-card-content>
-      <p>{{ read(item, 'SubTitle', 'Description', 'Address', 'Message') }}</p>
+      <p class="record-description" *ngIf="read(item, 'SubTitle', 'Description', 'Address', 'Message') !== label(item)">{{ read(item, 'SubTitle', 'Description', 'Address', 'Message') }}</p>
       <p *ngIf="read(item, 'Balance')">Balance: RM {{ read(item, 'Balance') }}</p>
-      <p *ngIf="read(item, 'Point')">Points: {{ read(item, 'Point') }}</p>
+      <p class="points-tag" *ngIf="read(item, 'Point')">{{ read(item, 'Point') }} points</p>
       <p *ngIf="read(item, 'TotalStamp')">Stamps: {{ read(item, 'TotalStamp') }}</p>
       <p *ngIf="read(item, 'Amount', 'TopupAmount', 'SpendAmount')">RM {{ read(item, 'Amount', 'TopupAmount',
         'SpendAmount') }}</p>
       <p *ngIf="read(item, 'ExpireDate')">Expires {{ read(item, 'ExpireDate') | date }}</p>
-      <p *ngIf="read(item, 'CreateDate', 'CreateTime')">{{ read(item, 'CreateDate', 'CreateTime') | date:'medium' }}</p>
+      <p *ngIf="read(item, 'CreateDate', 'CreateTime')">{{ read(item, 'CreateDate', 'CreateTime') | date:'dd MMM yyyy' }}</p>
       <ion-button fill="clear" *ngIf="area !== 'refer' && area !== 'profile'"
         (click)="detail(item)">Details</ion-button>
       <ion-button *ngIf="area === 'stores'" (click)="map(item)">Directions</ion-button>
       <ion-button *ngIf="area === 'notifications'" fill="clear" (click)="markRead(item)">Mark read</ion-button>
     </ion-card-content>
   </ion-card>
-  <p *ngIf="!loading && !error && !items.length && area !== 'profile' && area !== 'qr'">No records available.</p>
+  <p *ngIf="!loading && !error && !items.length && area !== 'profile' && area !== 'qr'">{{ area === 'rewards' && filter === 'mine' ? 'You don’t have any rewards yet.' : 'No records available.' }}</p>
 </ion-content>

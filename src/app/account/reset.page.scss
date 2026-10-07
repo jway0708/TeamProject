@@ -1,0 +1,25 @@
+:host { display: flex; flex-direction: column; }
+ion-toolbar { --background: #f8f7f2; --border-width: 0; }
+ion-back-button { --color: #31513c; font-size: 13px; }
+ion-content { --background: #f8f7f2; --padding-start: 24px; --padding-end: 24px; --padding-bottom: 36px; }
+.reset-shell { max-width: 430px; margin: 12px auto 0; color: #253b31; }
+.brand-mark { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 16px; background: #1b4d3e; color: #e3dcb9; font: 28px Georgia, serif; margin-bottom: 24px; }
+.eyebrow { font-size: 9px; letter-spacing: 1.8px; font-weight: 650; color: #889178; }
+h1 { font: 36px/1.2 Georgia, serif; margin: 10px 0 12px; letter-spacing: -.7px; }
+.intro { margin: 0 0 26px; max-width: 280px; font-size: 13px; line-height: 1.7; color: #7b8676; }
+.form-section { margin-bottom: 22px; }
+h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; font-size: 13px; font-weight: 650; }
+h2 span { display: grid; place-items: center; width: 25px; height: 25px; background: #e9eedf; color: #829071; border-radius: 8px; font-size: 9px; }
+.field { --background: #fff; --color: #2b4435; --padding-start: 15px; --padding-end: 15px; --padding-top: 10px; --padding-bottom: 12px; --highlight-color-focused: #1b4d3e; border: 1px solid #e2e7da; border-radius: 13px; margin-bottom: 12px; min-height: 68px; font-size: 14px; }
+.field::part(label) { font-size: 11px; color: #87917d; }
+.otp-row { display: flex; align-items: stretch; gap: 10px; }
+.otp-row .field { flex: 1; min-width: 0; margin: 0; }
+ion-button { text-transform: none; font-weight: 600; --box-shadow: none; --border-radius: 13px; }
+.otp-button { --color: #1b4d3e; --border-color: #c9d5be; --border-width: 1px; font-size: 11px; min-width: 85px; margin: 0; }
+.reset-button { --background: #1b4d3e; --color: #fff; height: 49px; margin: 6px 0 20px; font-size: 13px; }
+.back-link { display: flex; align-items: center; justify-content: center; gap: 10px; color: #6b7d60; font-size: 12px; text-decoration: none; padding: 8px; }
+.message { padding: 12px 15px; border-radius: 12px; border: 1px solid #e4e4d5; background: #f0efdf; color: #6e684c; margin-bottom: 20px; font-size: 12px; line-height: 1.6; }
+.message.success { background: #e7efdf; color: #36563b; }
+
+.password-toggle { border: 0; background: transparent; color: #31513c; font-size: 11px; font-weight: 600; min-width: 44px; min-height: 44px; cursor: pointer; }
+.password-toggle:focus-visible { outline: 2px solid #a7b98e; border-radius: 6px; }

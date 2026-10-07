@@ -1,3 +1,4 @@
+import { releasePageFocus } from '../services/page-focus';
 import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastController, LoadingController } from '@ionic/angular';
@@ -18,6 +19,7 @@ export class LoginPage implements OnDestroy {
   readonly demoOtpEnabled = this.apiService.demoOtpEnabled;
   email = '';
   password = '';
+  showPassword = false;
   phoneNumber: string = '';
   otpCode: string = '';
   countdown: number = 0;
@@ -49,7 +51,7 @@ export class LoginPage implements OnDestroy {
       next: async (res) => {
         await loading.dismiss();
         this.otpRequestedFor = phone;
-        this.showToast(this.demoOtpEnabled ? 'Test mode: enter your phone number as the OTP. No SMS is sent.' : 'OTP sent successfully!');
+        this.showToast('SMS sent');
         this.startCountdown();
       },
       error: async (err) => {
@@ -74,6 +76,13 @@ export class LoginPage implements OnDestroy {
   // 3. 提交登录
   async onSubmit() {
     const phone = this.phoneNumber.trim();
+
+    // Demo OTP：按照老师的要求，OTP 等于完整电话号码。
+    if (this.otpCode.trim() !== phone) {
+      await this.showToast('The OTP is incorrect.');
+      this.otpCode = '';
+      return;
+    }
 
     if (!this.otpRequestedFor || this.otpRequestedFor !== phone) {
       this.showToast('Please request an OTP for this phone number first.');
@@ -127,6 +136,7 @@ export class LoginPage implements OnDestroy {
     } catch (error) { this.showToast(error instanceof Error ? error.message : 'Unable to sign in.'); }
     finally { await loading.dismiss(); this.cdr?.markForCheck(); }
   }
+  ionViewWillLeave() { releasePageFocus(); }
   ngOnDestroy() { clearInterval(this.timer); }
 
   private async showToast(msg: string) {

@@ -1,3 +1,6 @@
+import { releasePageFocus } from '../services/page-focus';
+import { addIcons } from 'ionicons';
+import { notificationsOutline, qrCodeOutline, giftOutline, checkmarkCircleOutline, ticketOutline, locationOutline, personAddOutline } from 'ionicons/icons';
 import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
 import { MemberSession } from '../services/member-session';
 import { Router } from '@angular/router';
@@ -28,7 +31,9 @@ export class HomepagePage implements OnDestroy {
     { label: 'Refer', icon: 'person-add-outline', url: '/tabs/refer' },
   ];
 
-  constructor(private router: Router, private api: ApiService, private cdr?: ChangeDetectorRef, private session?: MemberSession) {}
+  constructor(private router: Router, private api: ApiService, private cdr?: ChangeDetectorRef, private session?: MemberSession) {
+    addIcons({ notificationsOutline, qrCodeOutline, giftOutline, checkmarkCircleOutline, ticketOutline, locationOutline, personAddOutline });
+  }
 
   ionViewWillEnter() { this.loadMember(); void this.loadContent(); }
   read(value: unknown, ...keys: string[]): string { return String(field(value, ...keys) ?? ''); }
@@ -81,12 +86,12 @@ export class HomepagePage implements OnDestroy {
     });
   }
 
-  ionViewWillLeave() { this.profileRequest?.unsubscribe(); }
+  ionViewWillLeave() { releasePageFocus(); this.profileRequest?.unsubscribe(); }
   ngOnDestroy() { this.profileRequest?.unsubscribe(); }
 
   // Function for the Show QR button
   showQRCode() {
-    this.router.navigateByUrl('/member-qr');
+    this.router.navigateByUrl('/tabs/qrcode');
   }
 
   // Function for the notifications button

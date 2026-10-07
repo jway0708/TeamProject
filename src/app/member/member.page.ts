@@ -5,6 +5,8 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { IonicModule, AlertController } from '@ionic/angular/lazy';
 import { firstValueFrom } from 'rxjs';
 import QRCode from 'qrcode';
+import { releasePageFocus } from '../services/page-focus';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ApiService } from '../services/api';
 import { ApiRecord, field, records } from '../services/api-response';
 import { MemberSession } from '../services/member-session';
@@ -61,6 +63,7 @@ export class MemberPage {
     this.qrImage = '';
     void this.load();
   }
+  ionViewWillLeave() { releasePageFocus(); }
   read(item: unknown, ...keys: string[]): string {
     const value = field(item, ...keys);
     return value == null ? '' : String(value);
@@ -203,6 +206,12 @@ export class MemberPage {
   private get(path: string) { return firstValueFrom(this.api.get(path)); }
   private post(path: string, body: unknown) { return firstValueFrom(this.api.post(path, body)); }
   private message(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      if (typeof error.error?.message === 'string') return error.error.message;
+      if (error.status === 404) return 'This service is unavailable. Please check the API route or restart the local backend.';
+      if (error.status === 401) return 'Your session has expired. Please sign in again.';
+      return 'Unable to load this information. Please try again shortly.';
+    }
     if (error instanceof Error) return error.message;
     return 'Unable to complete this request. Please try again.';
   }

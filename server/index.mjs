@@ -3,12 +3,25 @@ import { randomBytes } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { createAuthorization } from './loyalty-auth.mjs';
 
-// Only account bootstrap routes and the session-protected member profile are exposed.
-const contentRoutes = new Set(['/api/ManageHighlight/UserGetAllHighlight', '/api/MemberReward/GetRewards']);
-const memberReadRoutes = new Set(['/api/MemberDetails/GetMemberDetails', '/api/History/GetAllRecordByPhoneNumber']);
+// Expose explicit routes; member operations require a confirmed session.
+const contentRoutes = new Set(['/api/ManageHighlight/UserGetAllHighlight', '/api/MemberReward/GetRewards', '/api/MemberVoucher/GetAllVoucher', '/api/ManageOutlets/GetAllOutlets']);
+const memberReadRoutes = new Set(['/api/MemberDetails/GetMemberDetails', '/api/History/GetAllRecordByPhoneNumber',
+  '/api/MemberAccount/GetMemberStampList', '/api/MemberAccount/GetMemberStampUsedRecord',
+  '/api/MemberAccount/GetMemberReward', '/api/MemberVoucher/GetVoucherByPhone',
+  '/api/MemberVoucher/GetVoucherById', '/api/MemberAccount/GetMemberDownlineList',
+  '/api/MemberWallet/MemberGetWalletDetails', '/api/History/GetTopUpRecordByPhoneNumber']);
+const memberWriteRoutes = new Set(['/api/MemberAccount/MemberEditProfile', '/api/MemberAccount/GenerateMailOTP']);
+const phoneRegisterRoute = '/api/MemberLogin/PhoneNumberRegister';
+const phoneLoginRoute = '/api/MemberLogin/PhoneNumberLogin';
+const resetRoute = '/api/MemberAccount/MemberResetPassword';
 const routes = new Set([
+  resetRoute,
+  phoneLoginRoute,
+  phoneRegisterRoute,
   ...memberReadRoutes,
+  ...memberWriteRoutes,
   ...contentRoutes,
+  '/api/MemberReward/FindReward',
   '/api/MemberLogin/CheckEmailPassword',
   '/api/MemberAccount/RequestOTP',
   '/api/MemberAccount/RegisterOtp',
@@ -77,11 +90,11 @@ export function createGateway(config, fetchImpl = fetch) {
     } catch { return reply(400, { message: 'Send a valid JSON object.' }); }
     const sessionId = req.headers.cookie?.split(';').map(part => part.trim())
       .find(part => part.startsWith(`${cookieName}=`))?.slice(cookieName.length + 1);
-    if (loginRoutes.has(url.pathname) || url.pathname === '/api/MemberLogin/RegisterMember') {
+    if (loginRoutes.has(url.pathname) || url.pathname === phoneLoginRoute || url.pathname === phoneRegisterRoute || url.pathname === '/api/MemberLogin/RegisterMember') {
       if (sessionId) sessions.delete(sessionId);
       res.setHeader('Set-Cookie', sessionCookie('', 0));
     }
-    if (memberReadRoutes.has(url.pathname)) {
+    if (memberReadRoutes.has(url.pathname) || memberWriteRoutes.has(url.pathname) || url.pathname === resetRoute) {
       const session = sessions.get(sessionId);
       if (!session || session.expiresAt <= Date.now()) {
         sessions.delete(sessionId);
@@ -90,9 +103,71 @@ export function createGateway(config, fetchImpl = fetch) {
       if (body.PhoneNumber && canonicalPhone(body.PhoneNumber) !== canonicalPhone(session.phone)) {
         return reply(403, { message: 'You can only load your own member profile.' });
       }
-      body = { PhoneNumber: session.phone };
+      if (url.pathname === resetRoute) {
+        if (session.phoneOnly && (!config.allowPhoneNumberLogin || !['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.socket.remoteAddress) || canonicalPhone(body.OTP) !== canonicalPhone(session.phone))) {
+          return reply(403, { message: 'Enter the complete phone number as OTP for this local password reset.' });
+        }
+        if (typeof body.NewPassword !== 'string' || body.NewPassword.length < 6) {
+          return reply(400, { message: 'New password must contain at least 6 characters.' });
+        }
+        body = { PhoneNumber: session.phone, NewPassword: body.NewPassword };
+      } else if (url.pathname === '/api/MemberAccount/MemberEditProfile') {
+        if (typeof body.UserName !== 'string' || !body.UserName.trim()) return reply(400, { message: 'Name is required.' });
+        body = { PhoneNumber: session.phone, UserName: body.UserName.trim(),
+          Email: typeof body.Email === 'string' ? body.Email.trim() : '',
+          Birthday: body.Birthday || null, ImageByte: body.ImageByte || null };
+      } else if (url.pathname === '/api/MemberAccount/GenerateMailOTP') {
+        body = { PhoneNumber: session.phone, DeviceId: typeof body.DeviceId === 'string' ? body.DeviceId : '' };
+      } else if (url.pathname === '/api/MemberAccount/GetMemberDownlineList') {
+        try {
+          const response = await auth.post('/MemberDetails/GetMemberDetails', { PhoneNumber: session.phone });
+          if (!response.ok) return reply(502, { message: 'Unable to verify your referral code.' });
+          const value = await response.json();
+          const envelope = lowerKeys(value);
+          const profile = lowerKeys(envelope.data || value);
+          if (envelope.success === false || envelope.issuccess === false || canonicalPhone(profile.phonenumber) !== canonicalPhone(session.phone)) {
+            return reply(502, { message: 'Unable to verify your referral code.' });
+          }
+          if (!profile.referralcode) return reply(200, []);
+          body = { ReferralCode: profile.referralcode };
+        } catch { return reply(502, { message: 'Unable to load your referral details.' }); }
+      } else if (url.pathname === '/api/MemberVoucher/GetVoucherById') {
+        body = { PhoneNumber: session.phone, RewardId: body.RewardId };
+      } else {
+        body = { PhoneNumber: session.phone };
+      }
     }
     try {
+      if (url.pathname === phoneLoginRoute) {
+        if (!config.allowPhoneNumberLogin || !['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.socket.remoteAddress)) {
+          return reply(403, { message: 'Phone-number OTP login is only enabled for local development.' });
+        }
+        const phone = canonicalPhone(body.PhoneNumber);
+        if (!/^\d{8,15}$/.test(phone) || canonicalPhone(body.OTP) !== phone) {
+          return reply(400, { message: 'Enter the same phone number in the OTP field.' });
+        }
+        const upstream = await auth.post('/MemberDetails/GetMemberDetails', { PhoneNumber: body.PhoneNumber.trim() });
+        if (!upstream.ok) return reply(502, { message: 'Unable to load your member details. Check the backend API Token and phone number.' });
+        const value = await upstream.json();
+        const envelope = lowerKeys(value);
+        const profile = lowerKeys(envelope.data || value);
+        if (envelope.success === false || envelope.issuccess === false || envelope.error || envelope.errors || canonicalPhone(profile.phonenumber) !== phone) {
+          return reply(502, { message: 'No matching member profile was returned for this phone number.' });
+        }
+        const now = Date.now();
+        for (const [id, session] of sessions) if (session.expiresAt <= now) sessions.delete(id);
+        const id = randomBytes(32).toString('hex');
+        sessions.set(id, { phone: body.PhoneNumber.trim(), expiresAt: now + 3_600_000, phoneOnly: true });
+        res.setHeader('Set-Cookie', sessionCookie(id, 3600));
+        return reply(200, { success: true });
+      }
+      if (url.pathname === phoneRegisterRoute) {
+        if (!config.allowPhoneNumberLogin || !['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.socket.remoteAddress)) {
+          return reply(403, { message: 'Phone-number OTP registration is only enabled for local development.' });
+        }
+        const phone = canonicalPhone(body.PhoneNumber);
+        if (!/^\d{8,15}$/.test(phone) || canonicalPhone(body.OTP) !== phone) return reply(400, { message: 'The OTP is incorrect.' });
+      }
       // The existing frontend uses PhoneNumber/OtpCode; Swagger LoginData uses Phone/OTP.
       let upstreamBody = body;
       if (url.pathname === emailLoginRoute) {
@@ -106,12 +181,12 @@ export function createGateway(config, fetchImpl = fetch) {
         }
         upstreamBody = { Phone: body.PhoneNumber || body.Phone, OTP: String(body.OtpCode || body.OTP), FirstLogin: body.FirstLogin === true, DeviceId: body.DeviceId || '' };
       }
-      if (url.pathname === '/api/MemberLogin/RegisterMember') {
+      if (url.pathname === '/api/MemberLogin/RegisterMember' || url.pathname === phoneRegisterRoute) {
         // RegisterMember has no OTP field in Swagger. Do not treat registration
         // as an authenticated member session; require a subsequent real OTP login.
-        upstreamBody = { PhoneNumber: body.PhoneNumber, ReferralBy: body.ReferralCode || '' };
+        upstreamBody = { PhoneNumber: body.PhoneNumber, ReferralBy: body.ReferralBy || body.ReferralCode || '' };
       }
-      const upstream = await auth.post(url.pathname.slice(4), upstreamBody);
+      const upstream = await auth.post(url.pathname === phoneRegisterRoute ? '/MemberLogin/RegisterMember' : url.pathname.slice(4), upstreamBody);
       if (upstream.status === 401) {
         return reply(502, { message: 'Loyalty API rejected backend authorization. Check credentials or replace the configured Token.' });
       }
@@ -166,6 +241,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     password: process.env.LOYALTY_PASSWORD,
     token: process.env.LOYALTY_API_TOKEN,
     secureCookies: process.env.SECURE_COOKIES === 'true',
+    allowPhoneNumberLogin: process.argv.includes('--phone-number-login') && ['127.0.0.1', 'localhost', '::1'].includes(process.env.HOST || '127.0.0.1'),
   };
   const port = Number(process.env.PORT || 3000);
   if (!config.token && (!config.username || !config.password)) {

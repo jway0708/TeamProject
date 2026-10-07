@@ -1,3 +1,4 @@
+import { releasePageFocus } from '../services/page-focus';
 import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastController, LoadingController } from '@ionic/angular';
@@ -10,6 +11,7 @@ import { ApiService } from '../services/api';
   standalone: false,
 })
 export class RegisterPagePage implements OnDestroy {
+  readonly phoneOtpEnabled = this.apiService.demoOtpEnabled;
   phoneNumber: string = '';
   otpCode: string = '';
   referralCode: string = '';
@@ -50,11 +52,11 @@ export class RegisterPagePage implements OnDestroy {
     await loading.present();
 
     // isRegister 参数传 true
-    this.apiService.requestOtp(phone, true).subscribe({
+    (this.phoneOtpEnabled ? this.apiService.requestDemoOtp(phone) : this.apiService.requestOtp(phone, true)).subscribe({
       next: async (res) => {
         await loading.dismiss();
         this.otpRequestedFor = phone;
-        this.showToast('OTP sent successfully!');
+        this.showToast('SMS sent');
         this.startCountdown();
       },
       error: async (err) => {
@@ -85,6 +87,9 @@ export class RegisterPagePage implements OnDestroy {
       return;
     }
 
+    if (this.phoneOtpEnabled && this.otpCode.trim() !== phone) {
+      await this.showToast('The OTP is incorrect.'); this.otpCode = ''; return;
+    }
     const loading = await this.loadingCtrl.create({ message: 'Registering...' });
     await loading.present();
 
@@ -111,6 +116,7 @@ export class RegisterPagePage implements OnDestroy {
   goToLogin() {
     this.router.navigateByUrl('/login-page');
   }
+  ionViewWillLeave() { releasePageFocus(); }
   ngOnDestroy() { clearInterval(this.timer); }
 
   private async showToast(msg: string) {

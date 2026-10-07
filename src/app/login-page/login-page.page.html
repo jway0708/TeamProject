@@ -1,49 +1,21 @@
-<ion-header class="ion-no-border">
-  <ion-toolbar color="light">
-    <ion-title>Sign In</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content class="ion-padding">
-  <div class="auth-container">
-    <h2>Welcome Back</h2>
-    <p class="subtitle">Please enter your details to sign in</p>
-
-    <div class="ion-margin-bottom">
-      <ion-button type="button">Login</ion-button>
-      <ion-button type="button" fill="outline" routerLink="/register-page">Register</ion-button>
-    </div>
-    <ion-button fill="clear" (click)="emailMode = !emailMode">{{ emailMode ? 'Use phone OTP' : 'Use email and password'
-      }}</ion-button>
-    <form *ngIf="emailMode" (ngSubmit)="emailLogin()">
-      <ion-item><ion-input label="Email" type="email" [(ngModel)]="email" name="email" required></ion-input></ion-item>
-      <ion-item><ion-input label="Password" type="password" [(ngModel)]="password" name="password"
-          required></ion-input></ion-item>
-      <ion-button type="submit" expand="block" [disabled]="!email || !password">Sign in</ion-button>
-    </form>
-    <form *ngIf="!emailMode" (ngSubmit)="onSubmit()" class="ion-margin-top">
-      <!-- Phone Number -->
-      <ion-item lines="none">
-        <ion-label position="stacked">Phone Number</ion-label>
-        <ion-input type="tel" [(ngModel)]="phoneNumber" name="phoneNumber" placeholder="e.g. +60 12-345 6789"
-          required></ion-input>
-      </ion-item>
-
-      <!-- OTP Code + Get OTP Button -->
-      <ion-item lines="none">
-        <ion-label position="floating">OTP Code</ion-label>
-        <ion-input type="text" inputmode="tel" [(ngModel)]="otpCode" name="otpCode" required></ion-input>
-        <ion-button type="button" slot="end" fill="clear" (click)="onSendOtp()" [disabled]="countdown > 0">
-          {{ countdown > 0 ? countdown + 's' : 'Get OTP' }}
-        </ion-button>
-      </ion-item>
-
-      <!-- Submit Button -->
-      <ion-button expand="block" type="button" class="ion-margin-top" (click)="onSubmit()"
-        [disabled]="!phoneNumber || !otpCode">
-        Login
-      </ion-button>
-    </form>
-    <ion-button fill="clear" routerLink="/forgot-password">Forgot password?</ion-button>
-  </div>
+<ion-content class="login-content">
+  <main class="login-shell">
+    <header class="brand"><span class="brand-mark" aria-hidden="true">M</span><span>MEMBER<span class="brand-caption">Your everyday perks</span></span></header>
+    <section class="welcome"><span class="eyebrow">GOOD TO SEE YOU AGAIN</span><h1>Welcome back.</h1><p>Your rewards and little treats are waiting.</p></section>
+    <section class="form-card">
+      <div class="login-methods" role="group" aria-label="Sign-in method"><button type="button" [class.active]="!emailMode" [attr.aria-pressed]="!emailMode" (click)="emailMode = false">Phone number</button><button type="button" [class.active]="emailMode" [attr.aria-pressed]="emailMode" (click)="emailMode = true">Email</button></div>
+      <form *ngIf="!emailMode" (ngSubmit)="onSubmit()">
+        <ion-input class="field" label="Phone number" labelPlacement="stacked" type="tel" autocomplete="tel" [(ngModel)]="phoneNumber" name="phoneNumber" placeholder="+60123456789" required></ion-input>
+        <div class="otp-row"><ion-input class="field" label="OTP code" labelPlacement="stacked" type="text" inputmode="tel" autocomplete="one-time-code" [(ngModel)]="otpCode" name="otpCode" placeholder="Enter OTP" required></ion-input><ion-button class="otp-button" type="button" fill="outline" (click)="onSendOtp()" [disabled]="countdown > 0">{{ countdown > 0 ? countdown + 's' : 'Get OTP' }}</ion-button></div>
+        <ion-button class="login-button" expand="block" type="submit" [disabled]="!phoneNumber || !otpCode">Sign in</ion-button>
+      </form>
+      <form *ngIf="emailMode" (ngSubmit)="emailLogin()">
+        <ion-input class="field" label="Email address" labelPlacement="stacked" type="email" autocomplete="username" [(ngModel)]="email" name="email" placeholder="you@example.com" required></ion-input>
+        <ion-input class="field" label="Password" labelPlacement="stacked" [type]="showPassword ? 'text' : 'password'" autocomplete="current-password" [(ngModel)]="password" name="password" placeholder="Enter your password" required><button slot="end" class="password-toggle" type="button" (click)="showPassword = !showPassword" [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'" [attr.aria-pressed]="showPassword">{{ showPassword ? 'Hide' : 'Show' }}</button></ion-input>
+        <ion-button class="login-button" expand="block" type="submit" [disabled]="!email || !password">Sign in</ion-button>
+      </form>
+      <a class="forgot-link" routerLink="/forgot-password">Forgot password?</a>
+    </section>
+    <div class="register-section"><p>New here?</p><a routerLink="/register-page">Create an account <span>↗</span></a></div>
+  </main>
 </ion-content>

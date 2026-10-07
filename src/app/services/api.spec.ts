@@ -55,15 +55,47 @@ describe('ApiService', () => {
     expect(request.mock.calls[1][0].headers?.['Cookie']).toBe('member_session=test-session');
     expect(request.mock.calls[0][0].headers?.['Authorization']).toBeUndefined();
   });
-  it('test phone login uses demo data and never calls real member endpoints', async () => {
+  it('always sends a phone-number OTP to the backend for verification when no demo OTP was requested', () => {
+    api.loginOrRegister('+60123456789', '+60123456789').subscribe({ error: () => undefined });
+    const request = http.expectOne('/api/MemberLogin/MemberMobileLoginGetProfile');
+    expect(request.request.body.OTP).toBe('+60123456789');
+    request.flush('{"success":false}');
+    api.getMemberDetails('+60123456789').subscribe();
+    http.expectOne('/api/MemberDetails/GetMemberDetails').flush('{}');
+  });
+  it('uses phone-number login without SMS and then reads real member details', async () => {
     await firstValueFrom(api.requestDemoOtp('+60123456789'));
-    await expect(firstValueFrom(api.loginOrRegister('+60123456789', 'wrong'))).rejects.toThrow('same phone number');
-    await firstValueFrom(api.loginOrRegister('+60123456789', '60123456789'));
-    const profile = await firstValueFrom(api.getMemberDetails('+60123456789')) as { Name: string; PhoneNumber: string };
-    expect(profile.Name).toBe('Test Member');
-    expect(profile.PhoneNumber).toBe('+60123456789');
-    await expect(firstValueFrom(api.post('/MemberWallet/Topup', {}))).rejects.toThrow('demo data');
+    await expect(firstValueFrom(api.loginOrRegister('+60123456789', '123456'))).rejects.toThrow('same phone number');
+    const login = firstValueFrom(api.loginOrRegister('+60123456789', '60123456789'));
+    const request = http.expectOne('/api/MemberLogin/PhoneNumberLogin');
+    expect(request.request.body).toEqual({ PhoneNumber: '+60123456789', OTP: '60123456789' });
+    request.flush('{"success":true}'); await login;
+    const profile = firstValueFrom(api.getMemberDetails('+60123456789'));
+    http.expectOne('/api/MemberDetails/GetMemberDetails').flush('{"Name":"Actual Member","PhoneNumber":"+60123456789","Point":200}');
+    expect(await profile).toEqual({ Name: 'Actual Member', PhoneNumber: '+60123456789', Point: 200 });
     http.expectNone('/api/MemberAccount/RequestOTP');
-    http.expectNone('/api/MemberDetails/GetMemberDetails');
+    http.expectNone('/api/MemberLogin/MemberMobileLoginGetProfile');
+  });
+  it('verifies signup OTP before submitting the phone and referral code', async () => {
+    const registration = firstValueFrom(api.loginOrRegister('+60123456789', '012345', 'MYREF', true));
+    const verification = http.expectOne('/api/MemberLogin/MemberMobileLoginGetProfile');
+    expect(verification.request.body.FirstLogin).toBe(true);
+    expect(verification.request.body.OTP).toBe('012345');
+    http.expectNone('/api/MemberLogin/RegisterMember');
+    verification.flush('{"success":true}');
+    const request = http.expectOne('/api/MemberLogin/RegisterMember');
+    expect(request.request.body).toEqual({ PhoneNumber: '+60123456789', ReferralBy: 'MYREF' });
+    request.flush('{"success":true}');
+    expect(await registration).toEqual({ success: true });
+  });
+  it('uses local phone OTP for signup without calling SMS verification', async () => {
+    await firstValueFrom(api.requestDemoOtp('+60123456789'));
+    await expect(firstValueFrom(api.loginOrRegister('+60123456789', 'wrong', 'REF', true))).rejects.toThrow('same phone number');
+    const result = firstValueFrom(api.loginOrRegister('+60123456789', '+60123456789', 'REF', true));
+    const request = http.expectOne('/api/MemberLogin/PhoneNumberRegister');
+    expect(request.request.body).toEqual({ PhoneNumber: '+60123456789', OTP: '+60123456789', ReferralBy: 'REF' });
+    request.flush('{"success":true}'); await result;
+    http.expectNone('/api/MemberAccount/RegisterOtp');
+    http.expectNone('/api/MemberLogin/MemberMobileLoginGetProfile');
   });
 });

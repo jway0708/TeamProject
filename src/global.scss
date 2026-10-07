@@ -41,3 +41,34 @@ app-tabs ion-content::part(scroll) {
   padding-bottom: calc(124px + max(env(safe-area-inset-bottom, 0px), var(--ion-safe-area-bottom, 0px)));
   scroll-padding-bottom: calc(124px + max(env(safe-area-inset-bottom, 0px), var(--ion-safe-area-bottom, 0px)));
 }
+/* Consistent back navigation across account and member pages. */
+ion-toolbar.member-page-toolbar {
+  --background: #f8f7f2;
+  --border-width: 0;
+  --min-height: 68px;
+  --padding-start: 18px;
+  --padding-end: 18px;
+}
+.member-page-toolbar ion-buttons[slot="start"] { margin-inline: 0; }
+ion-back-button.member-back-button {
+  width: 44px;
+  height: 44px;
+  --color: #31513c;
+  --background: #fff;
+  --background-hover: #e9eedf;
+  --background-activated: #e9eedf;
+  --border-radius: 14px;
+  --padding-start: 0;
+  --padding-end: 0;
+  --icon-font-size: 21px;
+  --icon-margin-start: 0;
+  --icon-margin-end: 0;
+}
+ion-back-button.member-back-button::part(native) {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid #e2e7da;
+  border-radius: 14px;
+  justify-content: center;
+}
+.member-page-toolbar ion-title { color: #31513c; font-size: 15px; font-weight: 650; }

@@ -10,6 +10,12 @@ const routes: Routes = [
     component: TabsPage,
     children: [
       {
+        path: 'qrcode',
+        canActivate: [memberGuard],
+        loadComponent: () => import('../member/member.page').then(m => m.MemberPage),
+        data: { area: 'qr' },
+      },
+      {
         path: 'homepage',
         loadChildren: () =>
           import('../homepage/homepage.module').then(m => m.HomepagePageModule)

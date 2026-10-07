@@ -88,3 +88,22 @@ test('unconfirmed email login cannot create a member session', async t => {
   assert.equal(response.status, 502);
   assert.equal((await post(details, {}, response.headers.get('set-cookie'))).status, 401);
 });
+
+
+test('password reset requires a verified member session and binds the target phone', async t => {
+  let resetCalls = 0;
+  const post = await setup(t, async (url, options) => {
+    if (url.endsWith('/MemberMobileLoginGetProfile')) return json({ success: true });
+    resetCalls++;
+    assert.deepEqual(JSON.parse(options.body), { PhoneNumber: phone, NewPassword: 'new-password' });
+    return json({ success: true });
+  });
+  const reset = 'MemberAccount/MemberResetPassword';
+  assert.equal((await post(reset, { PhoneNumber: phone, NewPassword: 'new-password' })).status, 401);
+  const verified = await post(login, { Phone: phone, OTP: '123456' });
+  const cookie = verified.headers.get('set-cookie');
+  assert.equal((await post(reset, { PhoneNumber: '999', NewPassword: 'new-password' }, cookie)).status, 403);
+  assert.equal((await post(reset, { NewPassword: 'short' }, cookie)).status, 400);
+  assert.equal((await post(reset, { NewPassword: 'new-password', Extra: 'ignored' }, cookie)).status, 200);
+  assert.equal(resetCalls, 1);
+});

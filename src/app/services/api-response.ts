@@ -27,11 +27,21 @@ export function decodeResponse(raw: string): unknown {
   return value;
 }
 
-export function records(value: unknown): ApiRecord[] {
+export function records(value: unknown, depth = 0): ApiRecord[] {
+  if (depth > 8) throw new Error('The API response format is not supported.');
+  // Some .NET endpoints serialize the list before returning it as JSON.
+  if (typeof value === 'string') {
+    const text = value.trim();
+    if (!text) return [];
+    let decoded: unknown;
+    try { decoded = decodeResponse(text); }
+    catch { throw new Error(text.slice(0, 240)); }
+    return records(decoded, depth + 1);
+  }
   if (Array.isArray(value)) return value.filter(item => item && typeof item === 'object' && !Array.isArray(item));
   for (const key of ['Data', 'Items', 'Results', 'Records']) {
     const nested = field(value, key);
-    if (nested !== undefined) return records(nested);
+    if (nested !== undefined) return records(nested, depth + 1);
   }
   if (value == null) return [];
   if (typeof value === 'object') return [value as ApiRecord];

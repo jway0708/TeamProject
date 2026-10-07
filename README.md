@@ -78,3 +78,9 @@ RequestOTP 曾返回 401；Postman 另一次收到 HTTP 200，但正文为远端
 
 需求包括后端保管 API Token。当前按用户要求保留直连方式；如果 API 确实要求服务级 Token，
 应由受控后端提供会员会话和权限检查后接入，不能把共享 Token 内置到 APK。
+
+本地开发的手机号登录：点击 Get OTP 不发送短信，在 OTP 栏填写相同手机号即可查询该手机号的真实会员资料并进入首页。
+该登录由 npm run dev 开启，仅供本机开发使用，需要有效后端 API Token；不再返回 Test Member。Email 登录仍连接真实账户。忘记密码与注册仍使用真实短信 OTP。
+注册及忘记密码点击 Get OTP 后输入手机收到的验证码。
+请先配置 server/.env 中的有效 Loyalty API 凭据，再运行 npm run dev。
+密码重设通过本地网关的 MemberAccount/MemberResetPassword，必须有验证后的会员会话，目标手机号从会话取得。

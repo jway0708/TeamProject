@@ -38,5 +38,5 @@ process.on('SIGINT', () => stop());
 process.on('SIGTERM', () => stop());
 
 console.log('Starting API and frontend at http://localhost:8100. Press Ctrl+C to stop both.');
-run('API', ['--env-file=server/.env', 'server/index.mjs']);
+run('API', ['--watch', '--env-file=server/.env', 'server/index.mjs', '--phone-number-login']);
 run('Frontend', ['node_modules/@angular/cli/bin/ng.js', 'serve', '--port', '8100']);

@@ -100,3 +100,57 @@ ion-content.counter-content {
 .counter-actions a { display: flex; justify-content: center; align-items: center; gap: 7px; min-height: 46px; padding: 8px; border: 1px solid #2b3232; border-radius: 12px; color: #f2f4ef; text-decoration: none; font-size: 12px; font-weight: 650; }
 .counter-actions a.counter-redeem { background: #caf36b; border-color: #caf36b; color: #203316; }
 .counter-actions ion-icon { font-size: 17px; }
+/* Shared member controls */
+ion-button {
+  --color: #fff;
+  --border-radius: 12px;
+  --box-shadow: none;
+  text-transform: none;
+  font-weight: 600;
+}
+ion-button[fill="clear"] { --background: transparent; --color: #1b4d3e; }
+ion-button[fill="outline"] { --background: transparent; --color: #1b4d3e; --border-color: #c6d6cf; }
+ion-button[color="danger"] { --color: #b7473e; --background: transparent; }
+ion-back-button { --color: #1b4d3e; }
+ion-card { box-shadow: 0 5px 18px rgba(27, 77, 62, .06); border: 1px solid #e8e9e2; }
+ion-card-title { color: #22382e; line-height: 1.4; font-weight: 650; }
+ion-card-content { line-height: 1.65; }
+ion-segment { margin: 8px 0 22px; padding: 4px; border-radius: 14px; background: #e9ece5; }
+ion-segment-button { --color: #6d786e; --color-checked: #1b4d3e; --indicator-color: #fff; --border-radius: 10px; min-height: 40px; font-size: 13px; text-transform: none; font-weight: 600; }
+.refined-content { --padding-start: 20px; --padding-end: 20px; --padding-top: 20px; --padding-bottom: 110px; }
+.page-intro { margin: 4px 0 24px; }
+.eyebrow { color: #7b886e; font-size: 10px; font-weight: 750; letter-spacing: 1.8px; }
+.page-intro h1 { color: #1b4d3e; font-size: 27px; font-family: Georgia, serif; line-height: 1.2; margin: 10px 0; }
+.page-intro p { color: #7b8078; font-size: 13px; line-height: 1.6; margin: 0; }
+.benefit-card { overflow: hidden; border-radius: 20px; margin: 0 0 16px; }
+.card-category { display: flex; align-items: center; gap: 9px; padding: 16px 20px 0; color: #73846e; font-size: 10px; letter-spacing: 1.3px; font-weight: 650; }
+.card-category ion-icon { display: block; padding: 9px; font-size: 19px; border-radius: 12px; background: #edf3e9; color: #1b4d3e; }
+.benefit-card ion-card-header { padding: 14px 20px 8px; }
+.benefit-card ion-card-content { padding: 0 20px 18px; font-size: 12px; color: #7b8078; }
+.record-description { color: #59675c; margin-bottom: 12px; }
+.points-tag { display: inline-block; padding: 4px 10px; border-radius: 8px; background: #f3efdf; color: #76633c; font-weight: 650; margin: 4px 0 10px; }
+.benefit-card ion-button[fill="clear"] { display: flex; margin: 14px 0 0; border-top: 1px solid #edf0e9; --border-radius: 0; --padding-start: 0; justify-content: flex-start; min-height: 38px; }
+.profile-form { max-width: 560px; margin: auto; }
+.profile-identity { text-align: center; padding: 4px 0 24px; }
+.avatar { width: 76px; height: 76px; margin: 0 auto 12px; border: 4px solid #fff; border-radius: 50%; background: #e3ecdf; color: #1b4d3e; display: grid; place-items: center; font-size: 30px; font-family: Georgia, serif; box-shadow: 0 4px 16px #1b4d3e12; overflow: hidden; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.profile-identity h1 { margin: 0 0 5px; font-size: 23px; font-family: Georgia, serif; color: #22382e; }
+.profile-identity p { margin: 0; font-size: 12px; color: #7b8078; }
+.profile-identity .photo { position: relative; display: inline-block; margin: 12px 0 0; padding: 5px 10px; font-size: 12px; color: #1b4d3e; cursor: pointer; border-bottom: 1px solid #b9cabb; }
+.profile-identity .photo input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; margin: 0; }
+.profile-fields { padding: 20px; background: #fff; border-radius: 20px; border: 1px solid #e5e9e0; }
+.profile-fields h2 { margin: 0 0 16px; font-size: 15px; font-weight: 650; color: #22382e; }
+.profile-fields ion-item { --background: #f8f9f5; --padding-start: 14px; --inner-padding-end: 14px; --min-height: 66px; --color: #263d31; border: 1px solid #e7ebe3; border-radius: 12px; margin-bottom: 12px; }
+.profile-fields ion-input { --highlight-color-focused: #1b4d3e; font-size: 14px; }
+.profile-fields ion-input::part(label) { color: #7b8078; font-size: 12px; }
+.profile-fields > ion-button { margin: 18px 0 0; min-height: 46px; }
+.email-verification { margin-top: 12px; text-align: center; }
+.email-verification ion-button { font-size: 12px; margin: 0; }
+.email-verification p { margin: 0; color: #8a9086; font-size: 11px; line-height: 1.5; }
+.account-links { background: #fff; padding: 4px 12px; border-radius: 18px; border: 1px solid #e5e9e0; margin: 18px 0; overflow: hidden; }
+.account-links ion-item { --background: #fff; --min-height: 54px; --padding-start: 4px; --color: #354b3e; --border-color: #edf0e9; font-size: 14px; }
+.account-links ion-item:last-child { --border-width: 0; }
+.account-links ion-icon { color: #75917c; font-size: 20px; margin-right: 14px; }
+.logout-button { min-height: 46px; margin: 0; }
+.deactivate-button { font-size: 12px; margin-top: 8px; }
+@media (min-width: 700px) { .page-intro, .refined-content > ion-segment, .benefit-card { max-width: 640px; margin-left: auto; margin-right: auto; } }
