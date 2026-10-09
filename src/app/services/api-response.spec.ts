@@ -1,6 +1,19 @@
-import { decodeResponse, loginConfirmed, records } from './api-response';
+import { decodeResponse, loginConfirmed, records, referralCodeValid } from './api-response';
 
 describe('API response handling', () => {
+  it('treats known API empty-list messages as empty records without hiding failures', () => {
+    for (const message of ['No Record Found.', 'No Records Found', 'No Rewards Records Found', 'No Down Line Records Found', 'No Spend Records Found', 'No Vouchers Records Found']) {
+      expect(records(decodeResponse(JSON.stringify(message)))).toEqual([]);
+    }
+    expect(() => records('No connection found')).toThrow();
+  });
+  it('accepts the real referral validation response and rejects invalid or unknown responses', () => {
+    expect(referralCodeValid(decodeResponse('"Referral Code Exist"'))).toBe(true);
+    expect(referralCodeValid({ isValid: true })).toBe(true);
+    expect(referralCodeValid('Referral Code Not Exist')).toBe(false);
+    expect(referralCodeValid({ isValid: false })).toBe(false);
+    expect(referralCodeValid('unknown')).toBe(false);
+  });
   it('rejects a false result or a quoted backend error despite HTTP 200', () => {
     expect(() => decodeResponse('false')).toThrow();
     expect(() => decodeResponse('"The remote server returned an error: (400) Bad Request."')).toThrow();

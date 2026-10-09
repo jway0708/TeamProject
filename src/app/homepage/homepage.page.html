@@ -1,7 +1,7 @@
 <ion-content class="homepage-content">
   <main class="home-shell">
     <header class="top-header"><a class="brand" routerLink="/tabs/homepage"><span
-          class="brand-mark">M</span><span>MEMBER<span class="brand-caption">Your everyday
+          class="brand-mark" aria-hidden="true"><img src="assets/brand-mark.svg" alt=""></span><span>MEMBER<span class="brand-caption">Your everyday
             perks</span></span></a><button class="notification-btn" (click)="openNotifications()"
         aria-label="Notifications"><ion-icon name="notifications-outline"></ion-icon></button></header>
     <p *ngIf="loading" role="status" class="status-note">Loading your profile...</p>

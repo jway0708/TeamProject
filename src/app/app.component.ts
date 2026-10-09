@@ -19,11 +19,13 @@ export class AppComponent implements OnInit {
     if (!Capacitor.isNativePlatform()) return;
     void this.android.checkVersion();
     void this.android.registerPush(this.session.phone);
-    if (!this.session.phone) return;
+    const phone = this.session.phone;
+    if (!phone) return;
     try {
-      const response = await firstValueFrom(this.api.keepLoginUser(this.session.phone));
-      if (!loginConfirmed(response, this.session.phone)) throw new Error('Session not confirmed.');
-      await this.session.establish(this.session.phone);
-    } catch { this.session.clear(); }
+      const response = await firstValueFrom(this.api.keepLoginUser(phone));
+      if (this.session.phone !== phone) return;
+      if (!loginConfirmed(response, phone)) throw new Error('Session not confirmed.');
+      await this.session.establish(phone);
+    } catch { if (this.session.phone === phone) this.session.logout(); }
   }
 }

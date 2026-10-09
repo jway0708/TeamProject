@@ -33,6 +33,13 @@
  */
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
+
+.brand-mark > img {
+  display: block;
+  width: 72%;
+  height: 72%;
+  object-fit: contain;
+}
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 // @import "@ionic/angular/css/palettes/dark.system.css";
 

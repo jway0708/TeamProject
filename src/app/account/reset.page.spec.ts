@@ -45,7 +45,7 @@ describe('ResetPage phone-number OTP', () => {
     const page = new ResetPage(api as unknown as ApiService, { markForCheck: vi.fn() } as unknown as ChangeDetectorRef);
     try {
       page.phone = '+60123456789'; page.password = page.confirm = 'new-password';
-      await page.send(); expect(page.message).toBe('SMS sent');
+      await page.send(); expect(page.message).toContain('enter your complete phone number as OTP');
       expect(api.requestOtp).not.toHaveBeenCalled();
       page.otp = '123456'; await page.reset();
       expect(page.message).toContain('The OTP is incorrect.'); expect(page.otp).toBe('123456');

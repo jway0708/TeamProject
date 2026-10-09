@@ -12,6 +12,8 @@
     "start:api": "node --env-file=server/.env server/index.mjs",
     "test:api": "node --test server/*.test.mjs",
     "build": "ng build",
+    "configure:release": "node scripts/configure-release.mjs",
+    "build:release": "npm run configure:release && ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint"

@@ -3,12 +3,13 @@ import { addIcons } from 'ionicons';
 import { notificationsOutline, qrCodeOutline, giftOutline, checkmarkCircleOutline, ticketOutline, locationOutline, personAddOutline } from 'ionicons/icons';
 import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
 import { MemberSession } from '../services/member-session';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ApiService } from '../services/api';
 import { MemberProfile, parseMemberProfile } from '../services/member-profile';
 import { ApiRecord, field, records } from '../services/api-response';
 import { firstValueFrom } from 'rxjs';
+import { apiImage } from '../services/api-image';
 
 @Component({
   selector: 'app-homepage',
@@ -21,6 +22,7 @@ export class HomepagePage implements OnDestroy {
   loading = false;
   profileError = '';
   private profileRequest?: Subscription;
+  private sessionChanges?: Subscription;
   banners: ApiRecord[] = [];
   rewards: ApiRecord[] = [];
   contentError = '';
@@ -33,13 +35,19 @@ export class HomepagePage implements OnDestroy {
 
   constructor(private router: Router, private api: ApiService, private cdr?: ChangeDetectorRef, private session?: MemberSession) {
     addIcons({ notificationsOutline, qrCodeOutline, giftOutline, checkmarkCircleOutline, ticketOutline, locationOutline, personAddOutline });
+    this.sessionChanges = this.session?.profileChanges.subscribe(profile => {
+      this.profileRequest?.unsubscribe();
+      this.member = profile;
+      this.loading = false;
+      this.profileError = '';
+      this.cdr?.markForCheck();
+    });
   }
 
   ionViewWillEnter() { this.loadMember(); void this.loadContent(); }
   read(value: unknown, ...keys: string[]): string { return String(field(value, ...keys) ?? ''); }
   image(value: unknown): string {
-    const url = this.read(value, 'Image');
-    return /^https:\/\//i.test(url) ? url : '';
+    return apiImage(value);
   }
   async loadContent() {
     this.banners = []; this.rewards = []; this.contentError = '';
@@ -62,10 +70,13 @@ export class HomepagePage implements OnDestroy {
     this.profileError = '';
     const phone = localStorage.getItem('user_phone')?.trim();
     if (!phone) {
+      this.member = null;
       this.loading = false;
+      this.cdr?.markForCheck();
       return;
     }
     this.loading = true;
+    this.cdr?.markForCheck();
     this.profileRequest = this.api.getMemberDetails(phone).subscribe({
       next: response => {
         try { this.member = parseMemberProfile(response, phone); }
@@ -74,20 +85,23 @@ export class HomepagePage implements OnDestroy {
         this.cdr?.markForCheck();
       },
       error: error => {
-        this.cdr?.markForCheck();
         this.loading = false;
         if (error.status === 401) {
           localStorage.removeItem('user_phone');
+          this.member = null;
+          this.session?.clear();
           this.profileError = 'Your session has expired. Please sign in to view your member details.';
+          this.cdr?.markForCheck();
           return;
         }
         this.profileError = error.error?.message || error.message || 'Unable to load member profile.';
+        this.cdr?.markForCheck();
       },
     });
   }
 
   ionViewWillLeave() { releasePageFocus(); this.profileRequest?.unsubscribe(); }
-  ngOnDestroy() { this.profileRequest?.unsubscribe(); }
+  ngOnDestroy() { this.profileRequest?.unsubscribe(); this.sessionChanges?.unsubscribe(); }
 
   // Function for the Show QR button
   showQRCode() {

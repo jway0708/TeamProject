@@ -2,20 +2,22 @@ import { createServer } from 'node:http';
 import { randomBytes } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { createAuthorization } from './loyalty-auth.mjs';
+import { additionalReadRoutes, additionalWriteRoutes, specialRoutes, bindMemberOperation } from './member-operations.mjs';
 
 // Expose explicit routes; member operations require a confirmed session.
-const contentRoutes = new Set(['/api/ManageHighlight/UserGetAllHighlight', '/api/MemberReward/GetRewards', '/api/MemberVoucher/GetAllVoucher', '/api/ManageOutlets/GetAllOutlets']);
+const contentRoutes = new Set(['/api/ManageHighlight/UserGetAllHighlight', '/api/MemberReward/GetRewards', '/api/MemberVoucher/GetAllVoucher', '/api/ManageOutlets/GetAllOutlets', '/api/ManageVersion/GetAllVersion']);
 const memberReadRoutes = new Set(['/api/MemberDetails/GetMemberDetails', '/api/History/GetAllRecordByPhoneNumber',
   '/api/MemberAccount/GetMemberStampList', '/api/MemberAccount/GetMemberStampUsedRecord',
   '/api/MemberAccount/GetMemberReward', '/api/MemberVoucher/GetVoucherByPhone',
   '/api/MemberVoucher/GetVoucherById', '/api/MemberAccount/GetMemberDownlineList',
-  '/api/MemberWallet/MemberGetWalletDetails', '/api/History/GetTopUpRecordByPhoneNumber']);
-const memberWriteRoutes = new Set(['/api/MemberAccount/MemberEditProfile', '/api/MemberAccount/GenerateMailOTP']);
+  '/api/MemberWallet/MemberGetWalletDetails', '/api/History/GetTopUpRecordByPhoneNumber', ...additionalReadRoutes]);
+const memberWriteRoutes = new Set(['/api/MemberAccount/MemberEditProfile', '/api/MemberAccount/GenerateMailOTP', ...additionalWriteRoutes]);
 const phoneRegisterRoute = '/api/MemberLogin/PhoneNumberRegister';
 const phoneLoginRoute = '/api/MemberLogin/PhoneNumberLogin';
 const resetRoute = '/api/MemberAccount/MemberResetPassword';
 const routes = new Set([
   resetRoute,
+  '/api/MemberLogin/Logout',
   phoneLoginRoute,
   phoneRegisterRoute,
   ...memberReadRoutes,
@@ -82,7 +84,7 @@ export function createGateway(config, fetchImpl = fetch) {
       let size = 0;
       for await (const chunk of req) {
         size += chunk.length;
-        if (size > 16_384) return reply(413, { message: 'Request body is too large.' });
+        if (size > (url.pathname === '/api/MemberAccount/MemberEditProfile' ? 3_000_000 : 16_384)) return reply(413, { message: 'Request body is too large.' });
         chunks.push(chunk);
       }
       body = JSON.parse(Buffer.concat(chunks).toString());
@@ -90,6 +92,11 @@ export function createGateway(config, fetchImpl = fetch) {
     } catch { return reply(400, { message: 'Send a valid JSON object.' }); }
     const sessionId = req.headers.cookie?.split(';').map(part => part.trim())
       .find(part => part.startsWith(`${cookieName}=`))?.slice(cookieName.length + 1);
+    if (url.pathname === '/api/MemberLogin/Logout') {
+      sessions.delete(sessionId);
+      res.setHeader('Set-Cookie', sessionCookie('', 0));
+      return reply(200, { success: true });
+    }
     if (loginRoutes.has(url.pathname) || url.pathname === phoneLoginRoute || url.pathname === phoneRegisterRoute || url.pathname === '/api/MemberLogin/RegisterMember') {
       if (sessionId) sessions.delete(sessionId);
       res.setHeader('Set-Cookie', sessionCookie('', 0));
@@ -102,6 +109,10 @@ export function createGateway(config, fetchImpl = fetch) {
       }
       if (body.PhoneNumber && canonicalPhone(body.PhoneNumber) !== canonicalPhone(session.phone)) {
         return reply(403, { message: 'You can only load your own member profile.' });
+      }
+      if (url.pathname === '/api/MemberAccount/KeepLoginUser') {
+        // The gateway session, rather than an upstream device ID, authorizes access.
+        return reply(200, { success: true, PhoneNumber: session.phone });
       }
       if (url.pathname === resetRoute) {
         if (session.phoneOnly && (!config.allowPhoneNumberLogin || !['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.socket.remoteAddress) || canonicalPhone(body.OTP) !== canonicalPhone(session.phone))) {
@@ -131,6 +142,9 @@ export function createGateway(config, fetchImpl = fetch) {
           if (!profile.referralcode) return reply(200, []);
           body = { ReferralCode: profile.referralcode };
         } catch { return reply(502, { message: 'Unable to load your referral details.' }); }
+      } else if (specialRoutes.has(url.pathname)) {
+        try { body = await bindMemberOperation(auth, url.pathname, body, session.phone); }
+        catch (error) { return reply(error.status || 502, { message: error.status ? error.message : 'Unable to verify your member record.' }); }
       } else if (url.pathname === '/api/MemberVoucher/GetVoucherById') {
         body = { PhoneNumber: session.phone, RewardId: body.RewardId };
       } else {
@@ -185,6 +199,9 @@ export function createGateway(config, fetchImpl = fetch) {
         // RegisterMember has no OTP field in Swagger. Do not treat registration
         // as an authenticated member session; require a subsequent real OTP login.
         upstreamBody = { PhoneNumber: body.PhoneNumber, ReferralBy: body.ReferralBy || body.ReferralCode || '' };
+        for (const key of ['Name', 'Email', 'EmailSubcribe', 'Password']) {
+          if (typeof body[key] === 'string') upstreamBody[key] = key === 'Password' ? body[key] : body[key].trim();
+        }
       }
       const upstream = await auth.post(url.pathname === phoneRegisterRoute ? '/MemberLogin/RegisterMember' : url.pathname.slice(4), upstreamBody);
       if (upstream.status === 401) {
@@ -217,10 +234,16 @@ export function createGateway(config, fetchImpl = fetch) {
           return reply(502, { message: 'Loyalty API returned a profile for a different member or an unsupported profile format.' });
         }
         // Only display fields leave the backend; never expose Password or DeviceId.
-        const fields = ['Name', 'PhoneNumber', 'Email', 'Tier', 'Balance', 'Point', 'TotalStamp', 'ReferralCode'];
+        const fields = ['UserId', 'Name', 'PhoneNumber', 'Email', 'BirthDate', 'Image', 'ImageByte', 'Tier', 'Balance', 'Point', 'TotalStamp', 'ReferralCode', 'EmailVerified', 'PhoneVerified'];
         return reply(200, Object.fromEntries(fields.map(key => [key, profile[key.toLowerCase()] ?? null])));
       }
       // OTP responses can contain the actual code. Never return it to the browser.
+      // Preserve standard required-field messages before secret field names are removed.
+      if (!upstream.ok && value?.errors && typeof value.errors === 'object') {
+        const messages = Object.values(value.errors).flat().filter(entry =>
+          typeof entry === 'string' && /^The \w+ field is required\.$/.test(entry));
+        if (messages.length) value.message = messages.join(' ');
+      }
       const publicValue = JSON.parse(JSON.stringify(value, (key, entry) =>
         /^(otp|otpcode|token|access_token|accesstoken|jwttoken|password)$/i.test(key) ? undefined : entry));
       return reply(upstream.status, publicValue);

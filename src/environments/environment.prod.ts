@@ -1,6 +1,9 @@
+import { deployment } from './deployment';
+
 export const environment = {
-  nativeApiBaseUrl: '',
+  nativeApiBaseUrl: deployment.backendBaseUrl,
+  imageBaseUrl: deployment.imageBaseUrl,
   production: true,
   pushEnabled: false,
-  apiBaseUrl: 'https://xcodeappapi.xcode.com.my/api',
+  apiBaseUrl: deployment.backendBaseUrl || '/api',
 };

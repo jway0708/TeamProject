@@ -36,6 +36,13 @@ ion-card-title {
     color: #9b2424;
 }
 
+.detail-content {
+    --padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+}
+
+.detail-content h2 { color: #22382e; font-size: 20px; margin: 8px 0 20px; }
+.detail-description { color: #59675c; line-height: 1.65; overflow-wrap: anywhere; white-space: pre-line; margin-bottom: 16px; }
+
 .qr {
     display: flex;
     flex-direction: column;

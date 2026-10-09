@@ -5,7 +5,7 @@ import { memberGuard } from './services/member-session';
 const routes: Routes = [
   {
     path: 'home',
-    redirectTo: 'tabs/homepage',
+    redirectTo: 'login-page',
     pathMatch: 'full'
   },
   {
@@ -25,7 +25,8 @@ const routes: Routes = [
     path: 'homepage',
     redirectTo: 'tabs/homepage',
     pathMatch: 'full'
-  },  {
+  },
+  {
     path: 'tabs',
     loadChildren: () => import('./tabs/tabs.module').then( m => m.TabsPageModule)
   },

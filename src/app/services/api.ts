@@ -24,7 +24,13 @@ export class ApiService {
     this.demoRequestedPhone = phone.trim();
     return of({ success: true });
   }
-  private nativeCookie = '';
+  private readonly cookieKey = 'member_session_cookie:' + this.baseUrl;
+  private nativeCookie = localStorage.getItem(this.cookieKey) || '';
+  clearSession(): void {
+    this.clearDemo();
+    this.nativeCookie = '';
+    localStorage.removeItem(this.cookieKey);
+  }
   constructor(private http: HttpClient) { }
 
   private async nativeRequest(method: 'GET' | 'POST', path: string, body?: unknown): Promise<unknown> {
@@ -39,11 +45,18 @@ export class ApiService {
     if (cookie) {
       const match = String(cookie).match(/member_session=([^; ,]*)/);
       if (match) this.nativeCookie = match[1] ? 'member_session=' + match[1] : '';
+      if (this.nativeCookie) localStorage.setItem(this.cookieKey, this.nativeCookie);
+      else localStorage.removeItem(this.cookieKey);
     }
-    const raw = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+    // Capacitor may already decode a JSON string into plain text.
+    const raw = typeof response.data === 'string' && !/^[\s]*[\[{"]/.test(response.data)
+      ? JSON.stringify(response.data) : typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
     if (response.status >= 400) {
       let message = 'Backend request failed (' + response.status + ').';
-      try { message = JSON.parse(raw).message || message; } catch { /* Use status if no JSON message. */ }
+      try {
+        const value = JSON.parse(raw);
+        message = Object.values(value.errors || {}).flat().join(' ') || value.message || value.Message || value.title || message;
+      } catch { /* Use status if no JSON message. */ }
       throw Object.assign(new Error(message), { status: response.status });
     }
     return decodeResponse(raw);
@@ -64,17 +77,17 @@ export class ApiService {
   }
 
   // 3. 提交注册/登录
-  loginOrRegister(phone: string, otp: string, referralCode?: string, isRegister: boolean = false): Observable<any> {
+  loginOrRegister(phone: string, otp: string, referralCode?: string, isRegister: boolean = false, details?: { Name: string; Email: string; EmailSubcribe: string; Password?: string }): Observable<any> {
     if (this.demoOtpEnabled && this.demoRequestedPhone) {
       if (this.cleanPhone(phone) !== this.cleanPhone(this.demoRequestedPhone) || this.cleanPhone(String(otp)) !== this.cleanPhone(phone)) {
         return throwError(() => new Error('Enter the same phone number in the OTP field.'));
       }
-      return this.post(isRegister ? '/MemberLogin/PhoneNumberRegister' : '/MemberLogin/PhoneNumberLogin', { PhoneNumber: phone.trim(), OTP: String(otp), ...(isRegister ? { ReferralBy: referralCode?.trim() || '' } : {}) });
+      return this.post(isRegister ? '/MemberLogin/PhoneNumberRegister' : '/MemberLogin/PhoneNumberLogin', { PhoneNumber: phone.trim(), OTP: String(otp), ...(isRegister ? { ReferralBy: referralCode?.trim() || '', ...details } : {}) });
     }
     const endpoint = isRegister ? '/MemberLogin/RegisterMember' : '/MemberLogin/MemberMobileLoginGetProfile';
     // Send the field names defined by RegisterMemberParam and LoginData in Swagger.
     const body = isRegister
-      ? { PhoneNumber: phone, ReferralBy: referralCode || '' }
+      ? { PhoneNumber: phone, ReferralBy: referralCode || '', ...details }
       : { Phone: phone, OTP: String(otp), FirstLogin: false, DeviceId: this.getClientDeviceId() };
     if (isRegister) {
       // RegisterMember has no OTP parameter. Confirm the code before creating an account.

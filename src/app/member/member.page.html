@@ -49,8 +49,9 @@
     <p *ngIf="android.pushError">{{ android.pushError }}</p>
   </div>
   <form *ngIf="area === 'profile'" class="profile-form" (ngSubmit)="saveProfile()">
+    <p *ngIf="android.updateError" role="status" class="message">App update check unavailable. <ion-button fill="clear" type="button" (click)="android.checkVersion()">Retry</ion-button></p>
     <section class="profile-identity">
-      <div class="avatar"><img *ngIf="photo" [src]="'data:' + photoMime + ';base64,' + photo" alt="Profile photo"><span *ngIf="!photo">{{ (name || 'M').slice(0, 1).toUpperCase() }}</span></div>
+      <div class="avatar"><img *ngIf="photo || image(session.profile)" [src]="photo ? 'data:' + photoMime + ';base64,' + photo : image(session.profile)" alt="Profile photo"><span *ngIf="!photo && !image(session.profile)">{{ (name || 'M').slice(0, 1).toUpperCase() }}</span></div>
       <h1>{{ name || 'My account' }}</h1><p>{{ session.phone }}</p>
       <label class="photo">Change photo<input type="file" accept="image/*" (change)="choosePhoto($event)"></label>
     </section>
@@ -61,7 +62,7 @@
       <ion-item lines="none"><ion-input label="Email address" labelPlacement="stacked" type="email" [(ngModel)]="email" name="email"></ion-input></ion-item>
       <ion-item lines="none"><ion-input label="Birthday" labelPlacement="stacked" type="date" [(ngModel)]="birthday" name="birthday"></ion-input></ion-item>
       <ion-button type="submit" expand="block" [disabled]="loading || !name.trim()">Save changes</ion-button>
-      <div class="email-verification"><ion-button fill="clear" (click)="emailOtp()">Verify email address</ion-button><p>Contact support to complete verification.</p></div>
+      <div class="email-verification"><ion-button fill="clear" (click)="emailOtp()">Request verification email</ion-button><p>Contact support to complete verification.</p></div>
     </section>
     <ion-list class="account-links" lines="full">
       <ion-item routerLink="/tabs/wallet" detail><ion-icon name="wallet-outline" slot="start"></ion-icon><ion-label>Wallet</ion-label></ion-item>
@@ -84,37 +85,49 @@
     <ion-button type="submit" [disabled]="loading">Send feedback</ion-button>
     <h2>Past feedback</h2>
   </form>
-  <section *ngIf="qrImage && area !== 'qr'" class="qr">
+  <section *ngIf="qrImage && area !== 'qr' && !selected" class="qr">
     <h2>{{ qrTitle }}</h2><img [src]="qrImage" alt="QR code for the counter">
     <p *ngIf="area === 'qr'">{{ session.phone }}</p>
   </section>
-  <ion-card *ngIf="selected"><ion-card-header><ion-card-title>{{ label(selected)
-        }}</ion-card-title></ion-card-header><ion-card-content>
-      <p>{{ read(selected, 'Description', 'Message', 'Address') }}</p>
-      <p>{{ read(selected, 'TnC') }}</p>
+  <ion-modal [isOpen]="selected !== null" (didDismiss)="selected = null">
+    <ng-template>
+      <ion-header><ion-toolbar><ion-title>Details</ion-title><ion-buttons slot="end"><ion-button (click)="selected = null">Close</ion-button></ion-buttons></ion-toolbar></ion-header>
+      <ion-content class="ion-padding detail-content">
+        <ng-container *ngIf="selected as selected">
+      <h2>{{ label(selected) }}</h2>
+      <div class="detail-description" [innerHTML]="read(selected, 'Description', 'Content', 'Message', 'Address')"></div>
+      <div class="detail-description" [innerHTML]="read(selected, 'TnC')"></div>
       <p *ngIf="read(selected, 'Point')">{{ read(selected, 'Point') }} points</p>
       <p *ngIf="read(selected, 'ExpireDate')">Expires {{ read(selected, 'ExpireDate') | date }}</p>
-      <ion-button *ngIf="(area === 'rewards' || area === 'vouchers') && filter === 'mine'"
+      <p *ngIf="status(selected)">Status: {{ status(selected) }}</p>
+      <p *ngIf="error" role="alert" class="message error">{{ error }}</p>
+      <section *ngIf="qrImage" class="qr">
+        <h2>{{ qrTitle }}</h2><img [src]="qrImage" alt="Reward redemption QR code">
+      </section>
+      <ion-button *ngIf="(area === 'rewards' || area === 'vouchers') && filter === 'mine' && read(selected, 'QRCode', 'QRValue', 'QRContent')"
         (click)="rewardQr(selected)">Show redemption QR</ion-button>
-      <ion-button *ngIf="area === 'notifications'" (click)="markRead(selected)">Mark read</ion-button><ion-button
-        fill="clear" (click)="selected = null">Close</ion-button>
-    </ion-card-content></ion-card>
+      <ion-button *ngIf="area === 'notifications'" (click)="markRead(selected)">Mark read</ion-button>
+        </ng-container>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
   <ion-card *ngFor="let item of items" class="record-card" [class.benefit-card]="area === 'rewards' || area === 'highlight'">
     <div class="card-category" *ngIf="area === 'rewards' || area === 'highlight'"><ion-icon [name]="area === 'rewards' ? 'gift-outline' : 'sparkles-outline'"></ion-icon><span>{{ area === 'rewards' ? 'MEMBER REWARD' : 'PROMOTION' }}</span></div>
     <ion-card-header><ion-card-title>{{ label(item) }}</ion-card-title></ion-card-header><ion-card-content>
-      <p class="record-description" *ngIf="read(item, 'SubTitle', 'Description', 'Address', 'Message') !== label(item)">{{ read(item, 'SubTitle', 'Description', 'Address', 'Message') }}</p>
+      <div class="record-description" *ngIf="read(item, 'SubTitle', 'Description', 'Content', 'Address', 'Message') !== label(item)" [innerHTML]="read(item, 'SubTitle', 'Description', 'Content', 'Address', 'Message')"></div>
       <p *ngIf="read(item, 'Balance')">Balance: RM {{ read(item, 'Balance') }}</p>
       <p class="points-tag" *ngIf="read(item, 'Point')">{{ read(item, 'Point') }} points</p>
       <p *ngIf="read(item, 'TotalStamp')">Stamps: {{ read(item, 'TotalStamp') }}</p>
       <p *ngIf="read(item, 'Amount', 'TopupAmount', 'SpendAmount')">RM {{ read(item, 'Amount', 'TopupAmount',
         'SpendAmount') }}</p>
       <p *ngIf="read(item, 'ExpireDate')">Expires {{ read(item, 'ExpireDate') | date }}</p>
-      <p *ngIf="read(item, 'CreateDate', 'CreateTime')">{{ read(item, 'CreateDate', 'CreateTime') | date:'dd MMM yyyy' }}</p>
+      <p *ngIf="status(item)">Status: {{ status(item) }}</p>
+      <p *ngIf="read(item, 'CreateDate', 'CreateTime', 'PushTime')">{{ read(item, 'CreateDate', 'CreateTime', 'PushTime') | date:'dd MMM yyyy' }}</p>
       <ion-button fill="clear" *ngIf="area !== 'refer' && area !== 'profile'"
         (click)="detail(item)">Details</ion-button>
       <ion-button *ngIf="area === 'stores'" (click)="map(item)">Directions</ion-button>
       <ion-button *ngIf="area === 'notifications'" fill="clear" (click)="markRead(item)">Mark read</ion-button>
     </ion-card-content>
   </ion-card>
-  <p *ngIf="!loading && !error && !items.length && area !== 'profile' && area !== 'qr'">{{ area === 'rewards' && filter === 'mine' ? 'You don’t have any rewards yet.' : 'No records available.' }}</p>
+  <p *ngIf="!loading && !error && !items.length && area !== 'profile' && area !== 'qr'">{{ area === 'refer' ? 'No friends have joined with your referral code yet.' : area === 'rewards' && filter === 'mine' ? 'You don’t have any rewards yet.' : 'No records available.' }}</p>
 </ion-content>

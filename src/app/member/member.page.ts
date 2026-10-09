@@ -1,7 +1,8 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { IonicModule, AlertController } from '@ionic/angular/lazy';
 import { firstValueFrom } from 'rxjs';
 import QRCode from 'qrcode';
@@ -11,6 +12,7 @@ import { ApiService } from '../services/api';
 import { ApiRecord, field, records } from '../services/api-response';
 import { MemberSession } from '../services/member-session';
 import { AndroidMember } from '../services/android-member';
+import { apiImage } from '../services/api-image';
 
 const titles: Record<string, string> = {
   rewards: 'Rewards', vouchers: 'Vouchers', stamps: 'Stamps', history: 'History',
@@ -52,21 +54,44 @@ export class MemberPage {
   category = '';
   feedbackLocation = '';
   readonly historyOptions = Object.keys(histories);
+  private loadVersion = 0;
   constructor(private route: ActivatedRoute, private api: ApiService, public session: MemberSession,
-    public android: AndroidMember, private alerts: AlertController, private cdr: ChangeDetectorRef) { }
+    public android: AndroidMember, private alerts: AlertController, private cdr: ChangeDetectorRef) {
+    this.initializePage();
+  }
 
-  ionViewWillEnter() {
+  private initializePage(): void {
     this.area = this.route.snapshot.data['area'];
     this.title = titles[this.area] || 'Member';
+    if (this.area === 'profile') this.fillProfile();
+  }
+
+  private fillProfile(): void {
+    const profile = this.session.profile;
+    const canonical = (phone: string) => phone.replace(/[\s()+-]/g, '');
+    const current = profile && canonical(profile.phone) === canonical(this.session.phone) ? profile : null;
+    this.name = current?.name || '';
+    this.email = current?.email || '';
+    this.birthday = current?.birthday?.slice(0, 10) || '';
+    this.photo = current?.imageByte || '';
+  }
+
+  ionViewWillEnter() {
+    this.initializePage();
     this.filter = 'all';
     this.selected = null;
     this.qrImage = '';
     void this.load();
   }
-  ionViewWillLeave() { releasePageFocus(); }
+  ionViewWillLeave() { this.loadVersion++; releasePageFocus(); }
   read(item: unknown, ...keys: string[]): string {
     const value = field(item, ...keys);
     return value == null ? '' : String(value);
+  }
+  image(item: unknown): string { return apiImage(item); }
+  status(item: unknown): string {
+    const value = this.read(item, 'Status');
+    return /^[A-Za-z][A-Za-z ]*$/.test(value) ? value : '';
   }
   label(item: ApiRecord): string {
     return this.read(item, 'Name', 'Title', 'ShortTitle', 'Description', 'Type') || 'Record';
@@ -76,8 +101,10 @@ export class MemberPage {
       : this.area === 'history' || this.area === 'wallet' ? ['TopupId', 'Id'] : ['RewardId', 'StampId', 'Id'];
     return this.read(item, ...keys);
   }
-  async load(): Promise<void> {
+  async load(refreshProfile = false): Promise<void> {
+    const version = ++this.loadVersion;
     this.loading = true; this.error = ''; this.items = []; this.selected = null;
+    this.cdr.markForCheck();
     try {
       const phone = { PhoneNumber: this.session.phone };
       let result: unknown;
@@ -93,12 +120,12 @@ export class MemberPage {
         case 'refer':
           await this.session.establish(this.session.phone);
           if (!this.session.profile?.referralCode) { this.notice = 'No referral code is available for your account.'; return; }
-          result = await this.post('/MemberAccount/GetMemberDownlineList', { ReferralCode: this.session.profile.referralCode }); break;
+          result = await this.post('/MemberAccount/GetMemberDownlineList', { ReferralCode: this.session.profile.referralCode });
+          if (typeof result === 'string' && result.trim() === 'No Down Line Records Found') result = [];
+          break;
         case 'profile':
-          await this.session.establish(this.session.phone);
-          this.name = this.session.profile?.name || ''; this.email = this.session.profile?.email || '';
-          this.birthday = this.session.profile?.birthday?.slice(0, 10) || '';
-          this.photo = this.session.profile?.imageByte || '';
+          if (refreshProfile || !this.session.profile || !this.name) await this.session.establish(this.session.phone);
+          this.fillProfile();
           return;
         case 'feedback':
           if (!this.session.profile) await this.session.establish(this.session.phone);
@@ -113,11 +140,12 @@ export class MemberPage {
           return;
         default: return;
       }
-      this.items = records(result);
-    } catch (error) { this.error = this.message(error); }
-    finally { this.loading = false; this.cdr.markForCheck(); }
+      if (version === this.loadVersion) this.items = records(result);
+    } catch (error) { if (version === this.loadVersion) this.error = this.message(error); }
+    finally { if (version === this.loadVersion) { this.loading = false; this.cdr.markForCheck(); } }
   }
   async detail(item: ApiRecord): Promise<void> {
+    const version = this.loadVersion;
     this.error = ''; this.qrImage = '';
     try {
       const id = this.id(item);
@@ -128,11 +156,19 @@ export class MemberPage {
       if ((this.area === 'wallet' && this.filter === 'topups') || (this.area === 'history' && this.filter === 'topups')) {
         result = await this.post('/MemberAccount/GetTopUpRecordDetails', { TopupId: id });
       }
-      this.selected = records(result)[0] || null;
-    } catch (error) { this.error = this.message(error); }
+      const details = records(result)[0];
+      if (version !== this.loadVersion) return;
+      this.selected = details ? { ...item, ...details } : null;
+      if (this.selected) {
+        for (const key of ['QRCode', 'QRValue', 'QRContent']) {
+          if (!this.read(details, key) && this.read(item, key)) this.selected[key] = this.read(item, key);
+        }
+      }
+    } catch (error) { if (version === this.loadVersion) this.error = this.message(error); }
     finally { this.cdr.markForCheck(); }
   }
   async rewardQr(item: ApiRecord): Promise<void> {
+    this.error = ''; this.qrImage = '';
     try {
       const value = this.read(item, 'QRCode', 'QRValue', 'QRContent');
       if (!value) throw new Error('A redemption QR is not available yet. Please contact the store.');
@@ -167,7 +203,7 @@ export class MemberPage {
       PhoneNumber: this.session.phone, UserName: this.name.trim(), Email: this.email.trim(),
       Birthday: this.birthday || null, ImageByte: this.photo || null,
     }), 'Profile saved.');
-    if (!this.error) await this.load();
+    if (!this.error) await this.load(true);
   }
   async choosePhoto(event: Event): Promise<void> {
     const file = (event.target as HTMLInputElement).files?.[0];

@@ -1,5 +1,11 @@
 export type ApiRecord = Record<string, unknown>;
 
+export function referralCodeValid(value: unknown): boolean {
+  if (typeof value === 'string') return value.trim().toLowerCase() === 'referral code exist';
+  if (value === true) return true;
+  return field(value, 'IsValid') === true;
+}
+
 export function field(value: unknown, ...names: string[]): unknown {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
   const entries = Object.entries(value);
@@ -33,6 +39,7 @@ export function records(value: unknown, depth = 0): ApiRecord[] {
   if (typeof value === 'string') {
     const text = value.trim();
     if (!text) return [];
+    if (/^no (?:record|records|rewards records|down line records|spend records|vouchers records) found\.?$/i.test(text)) return [];
     let decoded: unknown;
     try { decoded = decodeResponse(text); }
     catch { throw new Error(text.slice(0, 240)); }

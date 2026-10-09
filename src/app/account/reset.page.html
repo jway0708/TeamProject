@@ -1,7 +1,9 @@
-<ion-header class="ion-no-border"><ion-toolbar class="member-page-toolbar"><ion-buttons slot="start"><ion-back-button class="member-back-button" text="" aria-label="Go back" defaultHref="/login-page"></ion-back-button></ion-buttons></ion-toolbar></ion-header>
+<ion-header class="ion-no-border"><ion-toolbar class="member-page-toolbar"><ion-buttons slot="start"><ion-back-button
+        class="member-back-button" text="" aria-label="Go back"
+        defaultHref="/login-page"></ion-back-button></ion-buttons></ion-toolbar></ion-header>
 <ion-content>
   <main class="reset-shell">
-    <span class="brand-mark" aria-hidden="true">M</span>
+    <span class="brand-mark" aria-hidden="true"><img src="assets/brand-mark.svg" alt=""></span>
     <span class="eyebrow">ACCOUNT RECOVERY</span>
     <h1>A fresh start.</h1>
     <p class="intro">Reset your password and get back to your member benefits.</p>
@@ -9,15 +11,30 @@
     <form (ngSubmit)="reset()">
       <section class="form-section">
         <h2><span>01</span> Verify your phone</h2>
-        <ion-input class="field" label="Phone number" labelPlacement="stacked" type="tel" autocomplete="tel" placeholder="+60123456789" [(ngModel)]="phone" name="phone" required></ion-input>
-        <div class="otp-row"><ion-input class="field" label="OTP code" labelPlacement="stacked" type="text" inputmode="tel" autocomplete="one-time-code" [(ngModel)]="otp" name="otp" placeholder="Enter OTP" required></ion-input><ion-button class="otp-button" type="button" fill="outline" (click)="send()" [disabled]="busy || countdown > 0">{{ countdown ? countdown + 's' : 'Get OTP' }}</ion-button></div>
+        <ion-input class="field" label="Phone number" labelPlacement="stacked" type="tel" autocomplete="tel"
+          placeholder="+60123456789" [(ngModel)]="phone" name="phone" required></ion-input>
+        <div class="otp-row"><ion-input class="field" label="OTP code" labelPlacement="stacked" type="text"
+            inputmode="tel" autocomplete="one-time-code" [(ngModel)]="otp" name="otp" placeholder="Enter OTP"
+            required></ion-input><ion-button class="otp-button" type="button" fill="outline" (click)="send()"
+            [disabled]="busy || countdown > 0">{{ countdown ? countdown + 's' : 'Get OTP' }}</ion-button></div>
       </section>
       <section class="form-section">
         <h2><span>02</span> Choose a new password</h2>
-        <ion-input class="field" label="New password" labelPlacement="stacked" [type]="showPassword ? 'text' : 'password'" autocomplete="new-password" [(ngModel)]="password" name="password" minlength="6" placeholder="At least 6 characters" required><button slot="end" class="password-toggle" type="button" (click)="showPassword = !showPassword" [attr.aria-label]="showPassword ? 'Hide new password' : 'Show new password'" [attr.aria-pressed]="showPassword">{{ showPassword ? 'Hide' : 'Show' }}</button></ion-input>
-        <ion-input class="field" label="Confirm password" labelPlacement="stacked" [type]="showConfirm ? 'text' : 'password'" autocomplete="new-password" [(ngModel)]="confirm" name="confirm" placeholder="Re-enter your password" required><button slot="end" class="password-toggle" type="button" (click)="showConfirm = !showConfirm" [attr.aria-label]="showConfirm ? 'Hide confirm password' : 'Show confirm password'" [attr.aria-pressed]="showConfirm">{{ showConfirm ? 'Hide' : 'Show' }}</button></ion-input>
+        <ion-input class="field" label="New password" labelPlacement="stacked"
+          [type]="showPassword ? 'text' : 'password'" autocomplete="new-password" [(ngModel)]="password" name="password"
+          minlength="6" placeholder="At least 6 characters" required><button slot="end" class="password-toggle"
+            type="button" (click)="showPassword = !showPassword"
+            [attr.aria-label]="showPassword ? 'Hide new password' : 'Show new password'"
+            [attr.aria-pressed]="showPassword">{{ showPassword ? 'Hide' : 'Show' }}</button></ion-input>
+        <ion-input class="field" label="Confirm password" labelPlacement="stacked"
+          [type]="showConfirm ? 'text' : 'password'" autocomplete="new-password" [(ngModel)]="confirm" name="confirm"
+          placeholder="Re-enter your password" required><button slot="end" class="password-toggle" type="button"
+            (click)="showConfirm = !showConfirm"
+            [attr.aria-label]="showConfirm ? 'Hide confirm password' : 'Show confirm password'"
+            [attr.aria-pressed]="showConfirm">{{ showConfirm ? 'Hide' : 'Show' }}</button></ion-input>
       </section>
-      <ion-button class="reset-button" expand="block" type="submit" [disabled]="busy || !otp || !password || !confirm">{{ busy ? 'Please wait…' : 'Reset password' }}</ion-button>
+      <ion-button class="reset-button" expand="block" type="submit"
+        [disabled]="busy || !otp || !password || !confirm">{{ busy ? 'Please wait…' : 'Reset password' }}</ion-button>
     </form>
     <a class="back-link" routerLink="/login-page">Back to sign in <span>↗</span></a>
   </main>

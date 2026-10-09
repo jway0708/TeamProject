@@ -1,5 +1,28 @@
 # Ionic Android 会员 App
 
+## 当前连接方式（2026-10-09 更新）
+
+当前开发 Android App 使用 `http://10.0.2.2:3000/api` 连接本机网关；浏览器通过开发代理连接同一个网关。运行 `npm run dev` 会一起启动网关和前端。后端文件变化会重启服务，内存中的会话会失效，需要重新登录。
+
+通知、反馈、历史分类、充值详情、版本查询和设备注册已加入网关；私有操作使用当前会话的手机号，通知和充值详情先核对记录归属，反馈 UserId 从当前会员资料取得。生日、头像和 UserId 已包含在资料响应中，Password、DeviceId 和上游 Token 不返回到资料页面。
+
+开发版 Get OTP 使用完整手机号作为本地测试 OTP，不发送短信；正式版走真实短信 OTP。没有真实 QR 数据时，voucher 的二维码按钮不显示。
+
+正式发布前配置自己部署的后端 HTTPS 地址：
+
+```powershell
+$env:MEMBER_BACKEND_URL = 'https://your-backend.example/api'
+# 如果 API 图片只有文件名，需要填写 API 方确认的图片目录地址。
+$env:MEMBER_IMAGE_BASE_URL = 'https://your-images.example/images'
+npm run build:release
+```
+
+这些命令中的域名是示例，不能直接使用。脚本只写入公开 URL，不写入授权凭据。正式 Android 构建缺少后端 URL 时，`build:release` 会明确停止；普通 `build` 用于检查代码能否编译，不能当成已经配置好发布连接。
+
+图片支持 API 的 ImageByte、完整 HTTPS Image 地址及明确配置的图片目录。不猜测服务器图片路径。Firebase 配置和真实推送、短信、邮件验证完成步骤、店员扫码、真实注册推荐奖励仍需联调。
+
+下面的原始说明部分保留了早期直连方案；涉及连接方式时，以本节和当前 environment 配置为准。
+
 本地开发可用一条命令同时启动前端（http://localhost:8100）和授权后端：
 
 ```powershell

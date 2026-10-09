@@ -1,6 +1,6 @@
 <ion-content class="login-content">
   <main class="login-shell">
-    <header class="brand"><span class="brand-mark" aria-hidden="true">M</span><span>MEMBER<span class="brand-caption">Your everyday perks</span></span></header>
+    <header class="brand"><span class="brand-mark" aria-hidden="true"><img src="assets/brand-mark.svg" alt=""></span><span>MEMBER<span class="brand-caption">Your everyday perks</span></span></header>
     <section class="welcome"><span class="eyebrow">GOOD TO SEE YOU AGAIN</span><h1>Welcome back.</h1><p>Your rewards and little treats are waiting.</p></section>
     <section class="form-card">
       <div class="login-methods" role="group" aria-label="Sign-in method"><button type="button" [class.active]="!emailMode" [attr.aria-pressed]="!emailMode" (click)="emailMode = false">Phone number</button><button type="button" [class.active]="emailMode" [attr.aria-pressed]="emailMode" (click)="emailMode = true">Email</button></div>

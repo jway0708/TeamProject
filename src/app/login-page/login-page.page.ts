@@ -1,6 +1,6 @@
 import { releasePageFocus } from '../services/page-focus';
 import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ToastController, LoadingController } from '@ionic/angular';
 import { ApiService } from '../services/api';
 import { MemberSession } from '../services/member-session';
@@ -51,7 +51,7 @@ export class LoginPage implements OnDestroy {
       next: async (res) => {
         await loading.dismiss();
         this.otpRequestedFor = phone;
-        this.showToast('SMS sent');
+        this.showToast(this.demoOtpEnabled ? 'For this local test, enter your complete phone number as OTP.' : 'SMS sent');
         this.startCountdown();
       },
       error: async (err) => {
@@ -78,7 +78,7 @@ export class LoginPage implements OnDestroy {
     const phone = this.phoneNumber.trim();
 
     // Demo OTP：按照老师的要求，OTP 等于完整电话号码。
-    if (this.otpCode.trim() !== phone) {
+    if (this.demoOtpEnabled && this.otpCode.replace(/[\s()+-]/g, '') !== phone.replace(/[\s()+-]/g, '')) {
       await this.showToast('The OTP is incorrect.');
       this.otpCode = '';
       return;

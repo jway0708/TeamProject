@@ -1,18 +1,36 @@
 :host { display: flex; flex-direction: column; }
 ion-toolbar { --background: #f8f7f2; --border-width: 0; }
-ion-back-button { --color: #31513c; font-size: 13px; }
-ion-content { --background: #f8f7f2; --padding-start: 24px; --padding-end: 24px; --padding-bottom: 36px; }
-.register-shell { max-width: 430px; margin: 12px auto 0; color: #253b31; }
-.brand-mark { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 16px; background: #1b4d3e; color: #e3dcb9; font: 28px Georgia, serif; margin-bottom: 24px; }
-.eyebrow { font-size: 9px; letter-spacing: 1.8px; font-weight: 650; color: #889178; }
-h1 { font: 36px/1.2 Georgia, serif; margin: 10px 0 12px; letter-spacing: -.7px; max-width: 310px; }
-.intro { margin: 0 0 28px; font-size: 13px; line-height: 1.7; color: #7b8676; }
-.form-card { padding: 20px; border: 1px solid #e5e9dd; background: #fff; border-radius: 22px; box-shadow: 0 8px 24px #1b4d3e06; }
-h2 { margin: 0 0 20px; font-size: 14px; font-weight: 650; }
-.field { --background: #f9faf6; --color: #2b4435; --padding-start: 14px; --padding-end: 14px; --padding-top: 10px; --padding-bottom: 12px; --highlight-color-focused: #1b4d3e; border: 1px solid #e2e7da; border-radius: 13px; margin-bottom: 14px; min-height: 68px; font-size: 14px; }
-.field::part(label) { font-size: 11px; color: #87917d; }
-.otp-row { display: flex; gap: 8px; }.otp-row .field { flex: 1; min-width: 0; margin: 0; }
-ion-button { text-transform: none; font-weight: 600; --box-shadow: none; --border-radius: 13px; }
-.otp-button { --color: #1b4d3e; --border-color: #c9d5be; --border-width: 1px; font-size: 11px; min-width: 75px; margin: 0; --padding-start: 10px; --padding-end: 10px; }
-.register-button { --background: #1b4d3e; --color: #fff; height: 49px; margin: 22px 0 0; font-size: 13px; }
-.sign-in { margin: 24px 0; text-align: center; font-size: 12px; color: #87917d; }.sign-in a { color: #31513c; text-decoration: none; font-weight: 600; margin-left: 5px; }
+ion-back-button { --color: #31513c; }
+ion-content { --background: #f8f7f2; --padding-start: 22px; --padding-end: 22px; --padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
+.register-shell { max-width: 440px; margin: 10px auto 0; color: #253b31; }
+.brand-line { display: flex; align-items: center; gap: 10px; }
+.register-brand { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; background: #1b4d3e; flex-shrink: 0; }
+.register-brand img { width: 23px; height: 23px; }
+.eyebrow { font-size: 9px; letter-spacing: 1.6px; font-weight: 650; color: #75816b; }
+.welcome { padding: 17px 0 22px; }
+h1 { font: 38px/1.08 Georgia, serif; margin: 0 0 12px; letter-spacing: -1.2px; }
+h1 span { color: #9ba980; }
+.intro { margin: 0; font-size: 13px; line-height: 1.6; color: #748071; }
+.form-card { padding: 22px 18px 18px; border: 1px solid #e1e6da; background: #fff; border-radius: 24px; box-shadow: 0 12px 35px #233c3108; }
+.card-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 22px; }
+h2 { margin: 0; font-size: 16px; letter-spacing: -.3px; font-weight: 650; }
+.member-tag { font-size: 8px; letter-spacing: 1px; color: #647957; background: #f0f3e9; padding: 7px 8px; border-radius: 6px; }
+.section-label { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #53674e; font-weight: 600; margin-bottom: 12px; }
+.section-label span { display: grid; place-items: center; width: 22px; height: 22px; border: 1px solid #dfe7d7; border-radius: 50%; font-size: 9px; color: #7c8e6f; font-weight: 500; }
+.verification { border-top: 1px solid #edf0e8; padding-top: 18px; margin-top: 18px; }
+.field { --background: #f8f9f5; --color: #294235; --padding-start: 14px; --padding-end: 14px; --padding-top: 8px; --padding-bottom: 8px; --placeholder-color: #84907e; --placeholder-opacity: 1; --highlight-color-focused: #1b4d3e; --highlight-height: 0; border: 1px solid #e4e9dd; border-radius: 12px; overflow: hidden; margin-bottom: 10px; min-height: 60px; font-size: 14px; }
+.field::part(label) { font-size: 12px; color: #566b50; }
+.field:focus-within { border-color: #829b70; box-shadow: 0 0 0 3px #eaf0e2; }
+.otp-row { display: flex; align-items: stretch; gap: 10px; }
+.otp-row .field { flex: 1; min-width: 0; margin: 0; }
+ion-button { text-transform: none; font-weight: 600; --box-shadow: none; --border-radius: 12px; }
+.otp-button { --color: #1b4d3e; --background: #f0f4eb; --border-color: #d5dfca; --border-width: 1px; font-size: 12px; width: 86px; height: auto; min-height: 60px; margin: 0; --padding-start: 10px; --padding-end: 10px; }
+.referral-field { margin-top: 10px; }
+.email-preference { padding: 9px 0 4px; }
+ion-checkbox { --size: 18px; --border-radius: 5px; --border-width: 1px; --border-color: #bccab1; --checkbox-background-checked: #1b4d3e; --border-color-checked: #1b4d3e; font-size: 12px; color: #65735d; width: 100%; }
+ion-checkbox::part(label) { white-space: normal; line-height: 1.5; margin-inline-start: 10px; }
+.register-button { --background: #1b4d3e; --background-activated: #123a2e; --color: #fff; height: 50px; margin: 18px 0 0; font-size: 14px; letter-spacing: .2px; }
+.sign-in { margin: 20px 0 12px; text-align: center; font-size: 13px; color: #7c8873; line-height: 1.6; }
+.sign-in a { color: #1b4d3e; text-decoration: none; font-weight: 650; margin-left: 5px; display: inline-block; padding: 10px 4px; }
+a:focus-visible { outline: 2px solid #829b70; outline-offset: 3px; border-radius: 4px; }
+@media (max-width: 350px) { ion-content { --padding-start: 16px; --padding-end: 16px; } .form-card { padding: 18px 14px; } h1 { font-size: 34px; } .member-tag { display: none; } }

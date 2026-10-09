@@ -74,3 +74,25 @@ test('local registration is disabled outside configured development mode', async
  const post=await setup(t,false,()=>{throw new Error('Unexpected request');});
  assert.equal((await post('MemberLogin/PhoneNumberRegister',{PhoneNumber:phone,OTP:phone})).status,403);
 });
+
+test('registration forwards required member details and subscription preference', async t => {
+ const post = await setup(t, true, async (url, options) => {
+   assert.deepEqual(JSON.parse(options.body), { PhoneNumber: phone, ReferralBy: 'MWODJ', Name: 'New Member', Email: 'member@example.test', EmailSubcribe: 'false' });
+   return Response.json({ success: true });
+ });
+ const result = await post('MemberLogin/PhoneNumberRegister', { PhoneNumber: phone, OTP: phone, ReferralBy: 'MWODJ', Name: 'New Member', Email: 'member@example.test', EmailSubcribe: 'false' });
+ assert.equal(result.status, 200);
+});
+
+test('registration preserves password and returns required-field messages without secret values', async t => {
+ const post = await setup(t, true, async (url, options) => {
+   assert.equal(JSON.parse(options.body).Password, ' test-password ');
+   return Response.json({ errors: { Password: ['The Password field is required.'] }, Password: 'private-value' }, { status: 400 });
+ });
+ const response = await post('MemberLogin/PhoneNumberRegister', { PhoneNumber: phone, OTP: phone, Password: ' test-password ' });
+ assert.equal(response.status, 400);
+ const body = await response.json();
+ assert.equal(body.message, 'The Password field is required.');
+ assert.equal(body.Password, undefined);
+ assert.equal(body.errors.Password, undefined);
+});

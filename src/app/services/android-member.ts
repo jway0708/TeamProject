@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import { PushNotifications } from '@capacitor/push-notifications';
@@ -6,25 +6,30 @@ import { Share } from '@capacitor/share';
 import { Geolocation } from '@capacitor/geolocation';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from './api';
-import { field, records } from './api-response';
+import { records } from './api-response';
 import { AlertController } from '@ionic/angular/lazy';
 import { environment } from '../../environments/environment';
+import { latestAndroidVersion } from './app-version';
 
 @Injectable({ providedIn: 'root' })
 export class AndroidMember {
-  pushError = '';
-  updateError = '';
+  private readonly pushErrorState = signal('');
+  private readonly updateErrorState = signal('');
+  get pushError(): string { return this.pushErrorState(); }
+  set pushError(value: string) { this.pushErrorState.set(value); }
+  get updateError(): string { return this.updateErrorState(); }
+  set updateError(value: string) { this.updateErrorState.set(value); }
   private initialized = false;
   constructor(private api: ApiService, private alerts: AlertController) {}
 
   async checkVersion(): Promise<void> {
     if (!Capacitor.isNativePlatform()) return;
+    this.updateError = '';
     try {
       const info = await App.getInfo();
       const versions = records(await firstValueFrom(this.api.get('/ManageVersion/GetAllVersion')));
-      const codes = versions.map(item => Number(field(item, 'AndroidVersionCode'))).filter(Number.isFinite);
-      if (!codes.length) throw new Error('Android version configuration was not returned by the API.');
-      const latest = Math.max(...codes);
+      const latest = latestAndroidVersion(versions);
+      if (latest === null) throw new Error('Android version configuration was not returned by the API.');
       if (latest <= Number(info.build)) return;
       const alert = await this.alerts.create({ header: 'Update required',
         message: 'Please install the latest app version to continue.', backdropDismiss: false,

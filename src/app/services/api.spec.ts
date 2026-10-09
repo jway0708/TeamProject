@@ -16,6 +16,14 @@ describe('ApiService', () => {
     localStorage.clear();
   });
   afterEach(() => { http.verify(); vi.restoreAllMocks(); });
+  it('includes the referral code when registering through the local phone login flow', async () => {
+    await firstValueFrom(api.requestDemoOtp('0123456789'));
+    const registration = firstValueFrom(api.loginOrRegister('0123456789', '0123456789', ' MWODJ ', true));
+    const request = http.expectOne('/api/MemberLogin/PhoneNumberRegister');
+    expect(request.request.body.ReferralBy).toBe('MWODJ');
+    request.flush('{"success":true}');
+    await registration;
+  });
   it('uses RequestOTP for login and RegisterOtp for signup', () => {
     api.requestOtp('012345', false).subscribe();
     const login = http.expectOne('/api/MemberAccount/RequestOTP');
@@ -48,12 +56,27 @@ describe('ApiService', () => {
     const nativeApi = new ApiService(TestBed.inject(HttpClient));
     const request = vi.spyOn(nativeHttp, 'request')
       .mockResolvedValueOnce({ status: 200, headers: { 'Set-Cookie': 'member_session=test-session; HttpOnly; Path=/api' }, data: '{"PhoneNumber":"012345"}', url: '' })
+      .mockResolvedValueOnce({ status: 200, headers: {}, data: '{"PhoneNumber":"012345"}', url: '' })
       .mockResolvedValueOnce({ status: 200, headers: {}, data: '{"PhoneNumber":"012345"}', url: '' });
     await firstValueFrom(nativeApi.loginWithEmail('member@example.test', 'test-password'));
-    await firstValueFrom(nativeApi.getMemberDetails('012345'));
+    const restartedApi = new ApiService(TestBed.inject(HttpClient));
+    await firstValueFrom(restartedApi.getMemberDetails('012345'));
     expect(request.mock.calls[0][0].url).toBe('http://10.0.2.2:3000/api/MemberLogin/CheckEmailPassword');
     expect(request.mock.calls[1][0].headers?.['Cookie']).toBe('member_session=test-session');
     expect(request.mock.calls[0][0].headers?.['Authorization']).toBeUndefined();
+    restartedApi.clearSession();
+    await firstValueFrom(restartedApi.getMemberDetails('012345'));
+    expect(request.mock.calls[2][0].headers?.['Cookie']).toBeUndefined();
+  });
+  it('accepts native decoded referral strings and reports required registration fields', async () => {
+    vi.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+    const nativeApi = new ApiService(TestBed.inject(HttpClient));
+    vi.spyOn(nativeHttp, 'request')
+      .mockResolvedValueOnce({ status: 200, headers: {}, data: 'Referral Code Exist', url: '' })
+      .mockResolvedValueOnce({ status: 400, headers: {}, data: { errors: { Name: ['The Name field is required.'] } }, url: '' });
+    expect(await firstValueFrom(nativeApi.checkReferralCode('MWODJ'))).toBe('Referral Code Exist');
+    await firstValueFrom(nativeApi.requestDemoOtp('+60123456789'));
+    await expect(firstValueFrom(nativeApi.loginOrRegister('+60123456789', '+60123456789', 'MWODJ', true))).rejects.toThrow('The Name field is required.');
   });
   it('always sends a phone-number OTP to the backend for verification when no demo OTP was requested', () => {
     api.loginOrRegister('+60123456789', '+60123456789').subscribe({ error: () => undefined });

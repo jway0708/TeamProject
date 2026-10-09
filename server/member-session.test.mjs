@@ -73,6 +73,10 @@ test('email login attaches backend authorization, creates a session and hides se
       assert.deepEqual(JSON.parse(options.body), { Email: 'member@example.test', Password: 'test-password' });
       return json({ Email: 'member@example.test', PhoneNumber: phone, Name: 'Member', Password: 'test-password' });
     }
+    if (url.endsWith('/GetMemberReward')) {
+      assert.deepEqual(JSON.parse(options.body), { PhoneNumber: phone });
+      return json([]);
+    }
     return json({ PhoneNumber: phone, Name: 'Member' });
   });
   const response = await post('MemberLogin/CheckEmailPassword', { Email: 'member@example.test', Password: 'test-password' });
@@ -80,6 +84,10 @@ test('email login attaches backend authorization, creates a session and hides se
   assert.equal((await response.json()).Password, undefined);
   assert.match(response.headers.get('set-cookie'), /HttpOnly/);
   assert.equal((await post(details, {}, response.headers.get('set-cookie'))).status, 200);
+  const rewards = await post('MemberAccount/GetMemberReward', {}, response.headers.get('set-cookie'));
+  assert.equal(rewards.status, 200);
+  assert.deepEqual(await rewards.json(), []);
+  assert.equal((await post('MemberAccount/GetMemberReward', { PhoneNumber: '999' }, response.headers.get('set-cookie'))).status, 403);
 });
 
 test('unconfirmed email login cannot create a member session', async t => {

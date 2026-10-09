@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular/lazy';
+import { ActivatedRoute, Router } from '@angular/router';
 import { RouterModule } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -26,7 +27,7 @@ export class ResetPage implements OnDestroy {
     this.busy = true; this.success = false;
     try {
       await firstValueFrom(this.phoneOtpEnabled ? this.api.requestDemoOtp(this.phone.trim()) : this.api.requestOtp(this.phone.trim(), false));
-      this.requestedPhone = this.phone.trim(); this.message = 'SMS sent';
+      this.requestedPhone = this.phone.trim(); this.message = this.phoneOtpEnabled ? 'For this local test, enter your complete phone number as OTP.' : 'SMS sent';
       this.countdown = 60;
       clearInterval(this.timer);
       this.timer = setInterval(() => { if (--this.countdown <= 0) clearInterval(this.timer); this.cdr.markForCheck(); }, 1000);
