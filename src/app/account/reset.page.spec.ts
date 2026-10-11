@@ -2,8 +2,18 @@ import { ChangeDetectorRef } from '@angular/core';
 import { of, throwError } from 'rxjs';
 import { ApiService } from '../services/api';
 import { ResetPage } from './reset.page';
+import { HttpErrorResponse } from '@angular/common/http';
 
 describe('ResetPage SMS verification', () => {
+  it('shows the backend error returned as JSON text', async () => {
+    const api = { requestOtp: vi.fn(() => throwError(() => new HttpErrorResponse({
+      status: 502, error: JSON.stringify({ message: 'No matching member profile was returned for this phone number.' }),
+    }))) };
+    const page = new ResetPage(api as unknown as ApiService, { markForCheck: vi.fn() } as unknown as ChangeDetectorRef);
+    page.phone = '+60123456789';
+    await page.send();
+    expect(page.message).toBe('No matching member profile was returned for this phone number.');
+  });
   it('requires a requested OTP and only resets after backend verification succeeds', async () => {
     const api = { requestOtp: vi.fn(() => of({ success: true })), verifyOtp: vi.fn(() => of({ success: true })), post: vi.fn(() => of({ success: true })) };
     const page = new ResetPage(api as unknown as ApiService, { markForCheck: vi.fn() } as unknown as ChangeDetectorRef);
@@ -45,7 +55,7 @@ describe('ResetPage phone-number OTP', () => {
     const page = new ResetPage(api as unknown as ApiService, { markForCheck: vi.fn() } as unknown as ChangeDetectorRef);
     try {
       page.phone = '+60123456789'; page.password = page.confirm = 'new-password';
-      await page.send(); expect(page.message).toContain('enter your complete phone number as OTP');
+      await page.send(); expect(page.message).toBe('SMS sent');
       expect(api.requestOtp).not.toHaveBeenCalled();
       page.otp = '123456'; await page.reset();
       expect(page.message).toContain('The OTP is incorrect.'); expect(page.otp).toBe('123456');

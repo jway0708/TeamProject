@@ -11,7 +11,8 @@ import { ApiService } from '../services/api';
 
 @Component({
   standalone: true, imports: [CommonModule, FormsModule, IonicModule, RouterModule],
-  templateUrl: './reset.page.html', styleUrls: ['./reset.page.scss'] })
+  templateUrl: './reset.page.html', styleUrls: ['./reset.page.scss']
+})
 export class ResetPage implements OnDestroy {
   phone = ''; otp = ''; password = ''; confirm = ''; message = ''; busy = false; countdown = 0;
   readonly phoneOtpEnabled = this.api.demoOtpEnabled;
@@ -27,7 +28,7 @@ export class ResetPage implements OnDestroy {
     this.busy = true; this.success = false;
     try {
       await firstValueFrom(this.phoneOtpEnabled ? this.api.requestDemoOtp(this.phone.trim()) : this.api.requestOtp(this.phone.trim(), false));
-      this.requestedPhone = this.phone.trim(); this.message = this.phoneOtpEnabled ? 'For this local test, enter your complete phone number as OTP.' : 'SMS sent';
+      this.requestedPhone = this.phone.trim(); this.message = 'SMS sent';
       this.countdown = 60;
       clearInterval(this.timer);
       this.timer = setInterval(() => { if (--this.countdown <= 0) clearInterval(this.timer); this.cdr.markForCheck(); }, 1000);
@@ -54,7 +55,17 @@ export class ResetPage implements OnDestroy {
   }
   ionViewWillLeave() { releasePageFocus(); }
   private errorMessage(error: unknown, fallback: string): string {
-    if (error instanceof HttpErrorResponse) return error.error?.message || fallback;
+    if (error instanceof HttpErrorResponse) {
+      let body = error.error;
+      if (typeof body === 'string') {
+        try { body = JSON.parse(body); } catch { body = undefined; }
+      }
+      if (body?.message || body?.Message) return body.message || body.Message;
+      if (error.status === 0 || error.status === 502 || error.status === 504) {
+        return 'Cannot reach the backend or Loyalty API. Check that the backend is running and its API credentials are valid.';
+      }
+      return fallback;
+    }
     return error instanceof Error ? error.message : fallback;
   }
   ngOnDestroy() { clearInterval(this.timer); }
